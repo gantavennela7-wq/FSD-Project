@@ -137,20 +137,6 @@ const Login = () => {
             Register here
           </Link>
         </div>
-
-        {/* Demo Credentials Box */}
-        <div style={styles.demoBox}>
-          <strong style={{ fontSize: '0.82rem', textTransform: 'uppercase', color: '#78716C' }}>Demo Credentials</strong>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginTop: '0.4rem' }}>
-            <span>Student: <code>student@lms.com</code> / <code>student123</code></span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginTop: '0.25rem' }}>
-            <span>Faculty: <code>faculty@lms.com</code> / <code>faculty123</code></span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginTop: '0.25rem' }}>
-            <span>Admin: <code>admin@lms.com</code> / <code>admin123</code></span>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -220,13 +206,6 @@ const styles = {
     marginTop: '1.75rem',
     fontSize: '0.9rem',
     color: '#78716C'
-  },
-  demoBox: {
-    marginTop: '1.75rem',
-    padding: '0.85rem',
-    backgroundColor: '#F3EFEA',
-    borderRadius: '8px',
-    border: '1px solid #E7E5E4'
   }
 };
 
