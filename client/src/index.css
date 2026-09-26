@@ -280,14 +280,206 @@ h4 { font-size: 1.25rem; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
 
 @media (max-width: 992px) {
-  .grid-4 { grid-template-columns: repeat(2, 1fr); }
-  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
 }
 
 @media (max-width: 640px) {
-  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; gap: 1rem; }
   h1 { font-size: 1.85rem; }
-  h2 { font-size: 1.5rem; }
+  h2 { font-size: 1.45rem; }
+  h3 { font-size: 1.2rem; }
+}
+
+/* Responsive Table Wrapper */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive Navbar Styles */
+.navbar-header {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E7E5E4;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+}
+
+.navbar-nav-desktop {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.navbar-toggle-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-main);
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.navbar-toggle-btn:hover {
+  background-color: var(--bg-subtle);
+}
+
+.navbar-mobile-drawer {
+  display: none;
+}
+
+@media (max-width: 868px) {
+  .navbar-nav-desktop {
+    display: none !important;
+  }
+  
+  .navbar-toggle-btn {
+    display: flex !important;
+  }
+  
+  .navbar-mobile-drawer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.25rem 1.5rem 1.75rem 1.5rem;
+    background-color: #FFFFFF;
+    border-bottom: 2px solid var(--border);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    animation: slideDown 0.22s ease-out;
+  }
+  
+  .navbar-mobile-link {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--text-main);
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+  }
+  
+  .navbar-mobile-link:hover, .navbar-mobile-link.active {
+    background-color: var(--primary-light);
+    color: var(--primary);
+  }
+  
+  .navbar-mobile-auth {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+  
+  .navbar-mobile-user {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+}
+
+/* Hero Responsive Grid */
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+/* Learning Workspace Responsive Grid */
+.learning-workspace-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1.75rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 992px) {
+  .learning-workspace-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* Course Details Meta Responsive Grid */
+.meta-box-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  background-color: #FFFFFF;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #E7E5E4;
+}
+
+@media (max-width: 768px) {
+  .meta-box-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Footer Responsive Grid */
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+  gap: 2.5rem;
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 992px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Loading Spinner */

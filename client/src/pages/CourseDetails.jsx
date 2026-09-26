@@ -131,7 +131,7 @@ const CourseDetails = () => {
             </p>
 
             {/* Course Meta Info */}
-            <div style={styles.metaBox}>
+            <div className="meta-box-grid">
               <div style={styles.metaCell}>
                 <User size={20} color="#B87333" />
                 <div>

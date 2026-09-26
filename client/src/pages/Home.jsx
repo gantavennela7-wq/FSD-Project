@@ -28,7 +28,7 @@ const Home = () => {
     <div>
       {/* Hero Section */}
       <section style={styles.hero}>
-        <div className="container" style={styles.heroContainer}>
+        <div className="container hero-grid">
           <div style={styles.heroContent}>
             <span className="badge badge-primary" style={{ marginBottom: '1.25rem' }}>
               🚀 Next-Generation Learning Management Platform

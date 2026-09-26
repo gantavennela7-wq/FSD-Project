@@ -209,7 +209,7 @@ const CourseLearning = () => {
         )}
 
         {/* Main Workspace Layout (Sidebar + Content View) */}
-        <div style={styles.workspaceGrid}>
+        <div className="learning-workspace-grid">
           {/* Lessons Sidebar */}
           <div className="card" style={styles.sidebar}>
             <div style={styles.sidebarHeader}>
@@ -489,6 +489,8 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '1rem',
     paddingTop: '1.5rem',
     borderTop: '1px solid #E7E5E4'
   }

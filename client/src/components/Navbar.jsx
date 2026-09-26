@@ -25,8 +25,8 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header style={styles.header}>
-      <div className="container" style={styles.navContainer}>
+    <header className="navbar-header">
+      <div className="container navbar-container">
         {/* Brand Logo */}
         <Link to={getHomeRoute()} style={styles.logo} onClick={() => setIsMobileOpen(false)}>
           <div style={styles.logoIcon}>
@@ -35,37 +35,35 @@ const Navbar = () => {
           <span style={styles.logoText}>EduVibe <span style={styles.logoSub}>LMS</span></span>
         </Link>
 
-        {/* Mobile Toggle */}
+        {/* Mobile Toggle Button */}
         <button
-          style={styles.mobileToggle}
+          type="button"
+          className="navbar-toggle-btn"
           onClick={() => setIsMobileOpen(!isMobileOpen)}
-          aria-label="Toggle menu"
+          aria-label={isMobileOpen ? 'Close menu' : 'Open menu'}
         >
-          {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMobileOpen ? <X size={26} color="#1C1917" /> : <Menu size={26} color="#1C1917" />}
         </button>
 
-        {/* Navigation Links */}
-        <nav style={{ ...styles.nav, ...(isMobileOpen ? styles.navMobileActive : {}) }}>
+        {/* Desktop Navigation Links */}
+        <nav className="navbar-nav-desktop">
           {!isAuthenticated ? (
             <>
               <Link
                 to="/"
                 style={{ ...styles.link, ...(isActive('/') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/courses"
                 style={{ ...styles.link, ...(isActive('/courses') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 Courses
               </Link>
               <Link
                 to="/about"
                 style={{ ...styles.link, ...(isActive('/about') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 About
               </Link>
@@ -73,14 +71,12 @@ const Navbar = () => {
                 <Link
                   to="/login"
                   className="btn btn-secondary btn-sm"
-                  onClick={() => setIsMobileOpen(false)}
                 >
                   Log In
                 </Link>
                 <Link
                   to="/register"
                   className="btn btn-primary btn-sm"
-                  onClick={() => setIsMobileOpen(false)}
                 >
                   Get Started
                 </Link>
@@ -91,28 +87,24 @@ const Navbar = () => {
               <Link
                 to="/student/dashboard"
                 style={{ ...styles.link, ...(isActive('/student/dashboard') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 <LayoutDashboard size={16} /> Dashboard
               </Link>
               <Link
                 to="/courses"
                 style={{ ...styles.link, ...(isActive('/courses') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 <BookOpen size={16} /> All Courses
               </Link>
               <Link
                 to="/student/my-courses"
                 style={{ ...styles.link, ...(isActive('/student/my-courses') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 <BookmarkCheck size={16} /> My Courses
               </Link>
               <Link
                 to="/student/profile"
                 style={{ ...styles.link, ...(isActive('/student/profile') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 <UserIcon size={16} /> Profile
               </Link>
@@ -132,28 +124,24 @@ const Navbar = () => {
               <Link
                 to="/faculty/dashboard"
                 style={{ ...styles.link, ...(isActive('/faculty/dashboard') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 <LayoutDashboard size={16} /> Faculty Dashboard
               </Link>
               <Link
                 to="/faculty/courses"
                 style={{ ...styles.link, ...(isActive('/faculty/courses') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 <BookOpen size={16} /> My Courses
               </Link>
               <Link
                 to="/faculty/students"
                 style={{ ...styles.link, ...(isActive('/faculty/students') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 <Users size={16} /> Students
               </Link>
               <Link
                 to="/faculty/profile"
                 style={{ ...styles.link, ...(isActive('/faculty/profile') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 <UserIcon size={16} /> Profile
               </Link>
@@ -175,35 +163,30 @@ const Navbar = () => {
               <Link
                 to="/admin/dashboard"
                 style={{ ...styles.link, ...(isActive('/admin/dashboard') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 <LayoutDashboard size={16} /> Admin Dashboard
               </Link>
               <Link
                 to="/admin/courses"
                 style={{ ...styles.link, ...(isActive('/admin/courses') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 <BookOpen size={16} /> Courses
               </Link>
               <Link
                 to="/admin/faculty"
                 style={{ ...styles.link, ...(isActive('/admin/faculty') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 <Users size={16} /> Faculty
               </Link>
               <Link
                 to="/admin/students"
                 style={{ ...styles.link, ...(isActive('/admin/students') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 <Users size={16} /> Students
               </Link>
               <Link
                 to="/admin/profile"
                 style={{ ...styles.link, ...(isActive('/admin/profile') ? styles.activeLink : {}) }}
-                onClick={() => setIsMobileOpen(false)}
               >
                 <UserIcon size={16} /> Profile
               </Link>
@@ -223,25 +206,191 @@ const Navbar = () => {
           ) : null}
         </nav>
       </div>
+
+      {/* Mobile Drawer (Visible when isMobileOpen is true on smaller screens) */}
+      {isMobileOpen && (
+        <div className="navbar-mobile-drawer">
+          {!isAuthenticated ? (
+            <>
+              <Link
+                to="/"
+                className={`navbar-mobile-link ${isActive('/') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                Home
+              </Link>
+              <Link
+                to="/courses"
+                className={`navbar-mobile-link ${isActive('/courses') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                Courses
+              </Link>
+              <Link
+                to="/about"
+                className={`navbar-mobile-link ${isActive('/about') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                About Us
+              </Link>
+              <div className="navbar-mobile-auth">
+                <Link
+                  to="/login"
+                  className="btn btn-secondary btn-lg"
+                  style={{ width: '100%' }}
+                  onClick={() => setIsMobileOpen(false)}
+                >
+                  Log In
+                </Link>
+                <Link
+                  to="/register"
+                  className="btn btn-primary btn-lg"
+                  style={{ width: '100%' }}
+                  onClick={() => setIsMobileOpen(false)}
+                >
+                  Get Started
+                </Link>
+              </div>
+            </>
+          ) : isStudent ? (
+            <>
+              <Link
+                to="/student/dashboard"
+                className={`navbar-mobile-link ${isActive('/student/dashboard') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <LayoutDashboard size={18} /> Student Dashboard
+              </Link>
+              <Link
+                to="/courses"
+                className={`navbar-mobile-link ${isActive('/courses') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <BookOpen size={18} /> All Courses
+              </Link>
+              <Link
+                to="/student/my-courses"
+                className={`navbar-mobile-link ${isActive('/student/my-courses') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <BookmarkCheck size={18} /> My Enrolled Courses
+              </Link>
+              <Link
+                to="/student/profile"
+                className={`navbar-mobile-link ${isActive('/student/profile') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <UserIcon size={18} /> My Account Profile
+              </Link>
+              <div className="navbar-mobile-user">
+                <span className="badge badge-primary">{user?.name}</span>
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-danger btn-sm"
+                >
+                  <LogOut size={16} /> Log Out
+                </button>
+              </div>
+            </>
+          ) : isFaculty ? (
+            <>
+              <Link
+                to="/faculty/dashboard"
+                className={`navbar-mobile-link ${isActive('/faculty/dashboard') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <LayoutDashboard size={18} /> Faculty Dashboard
+              </Link>
+              <Link
+                to="/faculty/courses"
+                className={`navbar-mobile-link ${isActive('/faculty/courses') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <BookOpen size={18} /> My Courses
+              </Link>
+              <Link
+                to="/faculty/students"
+                className={`navbar-mobile-link ${isActive('/faculty/students') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <Users size={18} /> Students
+              </Link>
+              <Link
+                to="/faculty/profile"
+                className={`navbar-mobile-link ${isActive('/faculty/profile') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <UserIcon size={18} /> Faculty Profile
+              </Link>
+              <div className="navbar-mobile-user">
+                <span className="badge badge-info" style={{ backgroundColor: '#FBF4ED', color: '#B87333', border: '1px solid #E7E5E4' }}>
+                  Faculty: {user?.name}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-danger btn-sm"
+                >
+                  <LogOut size={16} /> Log Out
+                </button>
+              </div>
+            </>
+          ) : isAdmin ? (
+            <>
+              <Link
+                to="/admin/dashboard"
+                className={`navbar-mobile-link ${isActive('/admin/dashboard') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <LayoutDashboard size={18} /> Admin Dashboard
+              </Link>
+              <Link
+                to="/admin/courses"
+                className={`navbar-mobile-link ${isActive('/admin/courses') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <BookOpen size={18} /> Manage Courses
+              </Link>
+              <Link
+                to="/admin/faculty"
+                className={`navbar-mobile-link ${isActive('/admin/faculty') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <Users size={18} /> Manage Faculty
+              </Link>
+              <Link
+                to="/admin/students"
+                className={`navbar-mobile-link ${isActive('/admin/students') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <Users size={18} /> Manage Students
+              </Link>
+              <Link
+                to="/admin/profile"
+                className={`navbar-mobile-link ${isActive('/admin/profile') ? 'active' : ''}`}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <UserIcon size={18} /> Admin Profile
+              </Link>
+              <div className="navbar-mobile-user">
+                <span className="badge badge-warning">
+                  <Shield size={12} style={{ marginRight: 4 }} /> Admin
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-danger btn-sm"
+                >
+                  <LogOut size={16} /> Log Out
+                </button>
+              </div>
+            </>
+          ) : null}
+        </div>
+      )}
     </header>
   );
 };
 
 const styles = {
-  header: {
-    backgroundColor: '#FFFFFF',
-    borderBottom: '1px solid #E7E5E4',
-    position: 'sticky',
-    top: 0,
-    zIndex: 100,
-    boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
-  },
-  navContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: '72px'
-  },
   logo: {
     display: 'flex',
     alignItems: 'center',
@@ -255,7 +404,8 @@ const styles = {
     borderRadius: '10px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    flexShrink: 0
   },
   logoText: {
     fontSize: '1.35rem',
@@ -267,11 +417,6 @@ const styles = {
     color: '#B87333',
     fontWeight: '600',
     fontSize: '1.1rem'
-  },
-  nav: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1.5rem'
   },
   link: {
     display: 'flex',
@@ -298,16 +443,6 @@ const styles = {
     alignItems: 'center',
     gap: '0.75rem',
     marginLeft: '0.5rem'
-  },
-  mobileToggle: {
-    display: 'none',
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    color: '#1C1917',
-    '@media (maxWidth: 768px)': {
-      display: 'block'
-    }
   }
 };
 
