@@ -4,6 +4,7 @@ import { enrollmentService, attendanceService } from '../services/api';
 import ProgressBar from '../components/ProgressBar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import AIAssistantModal from '../components/AIAssistantModal';
+import CodeCompiler from '../components/CodeCompiler';
 import {
   CheckCircle2,
   Circle,
@@ -12,9 +13,12 @@ import {
   Award,
   BookOpen,
   ChevronRight,
+  ChevronLeft,
   Flame,
   Bot,
-  Sparkles
+  Sparkles,
+  Layers,
+  Code
 } from 'lucide-react';
 
 const CourseLearning = () => {
@@ -28,6 +32,7 @@ const CourseLearning = () => {
   const [error, setError] = useState('');
   const [streak, setStreak] = useState(0);
   const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
+  const [aiCustomPrompt, setAiCustomPrompt] = useState('');
 
   useEffect(() => {
     const fetchEnrollmentAndAttendance = async () => {
@@ -120,14 +125,19 @@ const CourseLearning = () => {
     }
   };
 
+  const handleOpenAIWithPrompt = (promptText = '') => {
+    setAiCustomPrompt(promptText);
+    setIsAIAssistantOpen(true);
+  };
+
   if (loading) {
-    return <LoadingSpinner message="Opening course learning environment..." />;
+    return <LoadingSpinner message="Opening interactive classroom..." />;
   }
 
   if (error || !enrollment || !course) {
     return (
       <div className="container" style={{ padding: '4rem 1.5rem' }}>
-        <div className="alert alert-error">{error || 'Course environment not found'}</div>
+        <div className="alert alert-error">{error || 'Course classroom not found'}</div>
         <Link to="/student/dashboard" className="btn btn-secondary">
           <ArrowLeft size={16} /> Back to Student Dashboard
         </Link>
@@ -142,7 +152,7 @@ const CourseLearning = () => {
   const isCurrentLessonDone = completedLessons.has(currentLessonId);
 
   return (
-    <div style={{ padding: '2rem 0 4rem 0' }}>
+    <div style={{ padding: '2rem 0 4rem 0' }} className="digital-library-bg">
       <div className="container">
         {/* Top Header Bar */}
         <div style={styles.topHeader}>
@@ -165,7 +175,7 @@ const CourseLearning = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
             <button
               className="btn btn-primary"
-              onClick={() => setIsAIAssistantOpen(true)}
+              onClick={() => handleOpenAIWithPrompt('')}
               style={styles.askAiHeaderBtn}
             >
               <Bot size={18} />
@@ -203,9 +213,12 @@ const CourseLearning = () => {
           {/* Lessons Sidebar */}
           <div className="card" style={styles.sidebar}>
             <div style={styles.sidebarHeader}>
-              <h3 style={{ fontSize: '1.1rem' }}>Course Modules</h3>
-              <span style={{ fontSize: '0.8rem', color: '#78716C' }}>
-                {completedLessons.size} / {lessons.length} Completed
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <BookOpen size={18} color="#3D291F" />
+                <h3 style={{ fontSize: '1.05rem', margin: 0 }}>Course Modules</h3>
+              </div>
+              <span style={{ fontSize: '0.8rem', color: '#78716C', fontWeight: '700' }}>
+                {completedLessons.size} / {lessons.length} Done
               </span>
             </div>
 
@@ -264,7 +277,7 @@ const CourseLearning = () => {
                     </span>
                     <button
                       className="btn btn-secondary btn-sm"
-                      onClick={() => setIsAIAssistantOpen(true)}
+                      onClick={() => handleOpenAIWithPrompt(`Can you explain "${currentLesson.title}" from our lesson notes in simple terms?`)}
                       style={{ fontSize: '0.82rem', gap: '0.35rem' }}
                     >
                       <Bot size={15} color="#3D291F" /> Ask AI about this lesson
@@ -272,7 +285,7 @@ const CourseLearning = () => {
                   </div>
                   <h2>{currentLesson.title}</h2>
                   <span style={{ color: '#78716C', fontSize: '0.85rem' }}>
-                    Duration: {currentLesson.duration || '15 mins'}
+                    Estimated Duration: {currentLesson.duration || '15 mins'} • Practical Exercises Included
                   </span>
                 </div>
 
@@ -282,7 +295,14 @@ const CourseLearning = () => {
                   </p>
                 </div>
 
-                {/* Lesson Action Footer */}
+                {/* Integrated Online Code Compiler */}
+                <CodeCompiler
+                  course={course}
+                  currentLesson={currentLesson}
+                  onAskAI={(codeQuestion) => handleOpenAIWithPrompt(codeQuestion)}
+                />
+
+                {/* Lesson Navigation Footer */}
                 <div style={styles.contentFooter}>
                   <button
                     className={`btn ${isCurrentLessonDone ? 'btn-secondary' : 'btn-primary'}`}
@@ -301,9 +321,18 @@ const CourseLearning = () => {
                   </button>
 
                   <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                    {activeLessonIndex < lessons.length - 1 && (
+                    {activeLessonIndex > 0 && (
                       <button
                         className="btn btn-secondary"
+                        onClick={() => handleSelectLesson(activeLessonIndex - 1)}
+                      >
+                        <ChevronLeft size={18} /> Previous Lesson
+                      </button>
+                    )}
+
+                    {activeLessonIndex < lessons.length - 1 && (
+                      <button
+                        className="btn btn-primary"
                         onClick={() => handleSelectLesson(activeLessonIndex + 1)}
                       >
                         Next Lesson <ChevronRight size={18} />
@@ -324,9 +353,13 @@ const CourseLearning = () => {
       {/* AI Learning Assistant Modal */}
       <AIAssistantModal
         isOpen={isAIAssistantOpen}
-        onClose={() => setIsAIAssistantOpen(false)}
+        onClose={() => {
+          setIsAIAssistantOpen(false);
+          setAiCustomPrompt('');
+        }}
         course={course}
         currentLesson={currentLesson}
+        initialPrompt={aiCustomPrompt}
       />
     </div>
   );

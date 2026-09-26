@@ -17,7 +17,8 @@ const AIAssistantModal = ({
   isOpen,
   onClose,
   course,
-  currentLesson
+  currentLesson,
+  initialPrompt = ''
 }) => {
   const [messages, setMessages] = useState([
     {
@@ -33,6 +34,12 @@ const AIAssistantModal = ({
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    if (isOpen && initialPrompt) {
+      setInputQuestion(initialPrompt);
+    }
+  }, [isOpen, initialPrompt]);
 
   useEffect(() => {
     if (isOpen) {

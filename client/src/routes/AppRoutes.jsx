@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 // Public Pages
 import Home from '../pages/Home';
@@ -33,16 +34,56 @@ import Profile from '../pages/Profile';
 // Route Guard
 import ProtectedRoute from '../components/ProtectedRoute';
 
+// Guard that redirects logged-in users directly to their dashboard
+const PublicOnlyRoute = ({ children }) => {
+  const { user, isAuthenticated, loading } = useAuth();
+
+  if (loading) return null;
+
+  if (isAuthenticated && user) {
+    if (user.role === 'admin') {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+    if (user.role === 'faculty') {
+      return <Navigate to="/faculty/dashboard" replace />;
+    }
+    return <Navigate to="/student/dashboard" replace />;
+  }
+
+  return children;
+};
+
 const AppRoutes = () => {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<Home />} />
+      <Route
+        path="/"
+        element={
+          <PublicOnlyRoute>
+            <Home />
+          </PublicOnlyRoute>
+        }
+      />
       <Route path="/about" element={<About />} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/courses/:id" element={<CourseDetails />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route
+        path="/login"
+        element={
+          <PublicOnlyRoute>
+            <Login />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <PublicOnlyRoute>
+            <Register />
+          </PublicOnlyRoute>
+        }
+      />
 
       {/* Protected Student Routes */}
       <Route

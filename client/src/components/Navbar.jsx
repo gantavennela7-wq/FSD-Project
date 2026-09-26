@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { BookOpen, User as UserIcon, LogOut, Menu, X, Shield, LayoutDashboard, BookmarkCheck, Users } from 'lucide-react';
 
 const Navbar = () => {
-  const { user, isAuthenticated, isAdmin, isStudent, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, isFaculty, isStudent, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -15,13 +15,20 @@ const Navbar = () => {
     setIsMobileOpen(false);
   };
 
+  const getHomeRoute = () => {
+    if (!isAuthenticated) return '/';
+    if (isAdmin) return '/admin/dashboard';
+    if (isFaculty) return '/faculty/dashboard';
+    return '/student/dashboard';
+  };
+
   const isActive = (path) => location.pathname === path;
 
   return (
     <header style={styles.header}>
       <div className="container" style={styles.navContainer}>
         {/* Brand Logo */}
-        <Link to="/" style={styles.logo} onClick={() => setIsMobileOpen(false)}>
+        <Link to={getHomeRoute()} style={styles.logo} onClick={() => setIsMobileOpen(false)}>
           <div style={styles.logoIcon}>
             <BookOpen size={22} color="#FFFFFF" />
           </div>
@@ -120,6 +127,49 @@ const Navbar = () => {
                 </button>
               </div>
             </>
+          ) : isFaculty ? (
+            <>
+              <Link
+                to="/faculty/dashboard"
+                style={{ ...styles.link, ...(isActive('/faculty/dashboard') ? styles.activeLink : {}) }}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <LayoutDashboard size={16} /> Faculty Dashboard
+              </Link>
+              <Link
+                to="/faculty/courses"
+                style={{ ...styles.link, ...(isActive('/faculty/courses') ? styles.activeLink : {}) }}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <BookOpen size={16} /> My Courses
+              </Link>
+              <Link
+                to="/faculty/students"
+                style={{ ...styles.link, ...(isActive('/faculty/students') ? styles.activeLink : {}) }}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <Users size={16} /> Students
+              </Link>
+              <Link
+                to="/faculty/profile"
+                style={{ ...styles.link, ...(isActive('/faculty/profile') ? styles.activeLink : {}) }}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <UserIcon size={16} /> Profile
+              </Link>
+              <div style={styles.userInfo}>
+                <span className="badge badge-info" style={{ backgroundColor: '#FBF4ED', color: '#B87333', border: '1px solid #E7E5E4' }}>
+                  Faculty: {user?.name}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-secondary btn-sm"
+                  title="Logout"
+                >
+                  <LogOut size={16} /> Logout
+                </button>
+              </div>
+            </>
           ) : isAdmin ? (
             <>
               <Link
@@ -127,7 +177,7 @@ const Navbar = () => {
                 style={{ ...styles.link, ...(isActive('/admin/dashboard') ? styles.activeLink : {}) }}
                 onClick={() => setIsMobileOpen(false)}
               >
-                <LayoutDashboard size={16} /> Dashboard
+                <LayoutDashboard size={16} /> Admin Dashboard
               </Link>
               <Link
                 to="/admin/courses"
@@ -135,6 +185,13 @@ const Navbar = () => {
                 onClick={() => setIsMobileOpen(false)}
               >
                 <BookOpen size={16} /> Courses
+              </Link>
+              <Link
+                to="/admin/faculty"
+                style={{ ...styles.link, ...(isActive('/admin/faculty') ? styles.activeLink : {}) }}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <Users size={16} /> Faculty
               </Link>
               <Link
                 to="/admin/students"

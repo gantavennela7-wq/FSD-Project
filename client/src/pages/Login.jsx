@@ -36,16 +36,16 @@ const Login = () => {
     try {
       const user = await login(formData.email, formData.password);
       
-      // Redirect based on role
+      // Redirect strictly based on role
       const fromPath = location.state?.from?.pathname;
-      if (fromPath && !fromPath.includes('/login') && !fromPath.includes('/register')) {
-        navigate(fromPath);
+      if (fromPath && fromPath !== '/' && !fromPath.includes('/login') && !fromPath.includes('/register')) {
+        navigate(fromPath, { replace: true });
       } else if (user.role === 'admin') {
-        navigate('/admin/dashboard');
+        navigate('/admin/dashboard', { replace: true });
       } else if (user.role === 'faculty') {
-        navigate('/faculty/dashboard');
+        navigate('/faculty/dashboard', { replace: true });
       } else {
-        navigate('/student/dashboard');
+        navigate('/student/dashboard', { replace: true });
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid email or password. Please try again.');

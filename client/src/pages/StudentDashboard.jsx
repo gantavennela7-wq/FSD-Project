@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { enrollmentService, attendanceService } from '../services/api';
 import DashboardCard from '../components/DashboardCard';
 import ProgressBar from '../components/ProgressBar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import AttendanceCalendar from '../components/AttendanceCalendar';
 import LearningMilestones from '../components/LearningMilestones';
+import AIAssistantModal from '../components/AIAssistantModal';
 import {
   BookOpen,
   CheckCircle,
@@ -16,14 +18,20 @@ import {
   Flame,
   Calendar as CalendarIcon,
   Activity,
-  Award
+  Award,
+  Sparkles,
+  Bot,
+  Compass,
+  ArrowRight
 } from 'lucide-react';
 
 const StudentDashboard = () => {
+  const { user } = useAuth();
   const [enrollments, setEnrollments] = useState([]);
   const [attendanceStats, setAttendanceStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isAIOpen, setIsAIOpen] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -55,6 +63,9 @@ const StudentDashboard = () => {
     ? Math.round(enrollments.reduce((acc, curr) => acc + (curr.progress || 0), 0) / totalEnrolled)
     : 0;
 
+  // Primary active course to feature in "Continue Learning"
+  const activeCourseItem = enrollments.find((e) => e.status === 'In Progress') || enrollments[0];
+
   const currentStreak = attendanceStats?.currentStreak || 0;
   const longestStreak = attendanceStats?.longestStreak || 0;
   const monthlyAtt = attendanceStats?.monthlyAttendance || {
@@ -70,26 +81,109 @@ const StudentDashboard = () => {
   const milestones = attendanceStats?.milestones || [];
 
   if (loading) {
-    return <LoadingSpinner message="Loading your dashboard..." />;
+    return <LoadingSpinner message="Opening your learning hub..." />;
   }
 
   return (
-    <div style={{ padding: '3rem 0 5rem 0' }}>
+    <div style={{ padding: '2.5rem 0 5rem 0' }} className="digital-library-bg">
       <div className="container">
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+        {/* Welcome Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h1 className="section-title">Student Dashboard</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+              <span className="badge badge-primary" style={{ padding: '0.2rem 0.6rem' }}>
+                <BookOpen size={13} style={{ marginRight: 4 }} /> Student Learning Space
+              </span>
+              {currentStreak > 0 && (
+                <span className="badge badge-warning" style={{ padding: '0.2rem 0.6rem' }}>
+                  🔥 {currentStreak} Day Streak
+                </span>
+              )}
+            </div>
+            <h1 className="section-title">Welcome back, {user?.name || 'Student'}! 👋</h1>
             <p className="section-subtitle" style={{ marginBottom: 0 }}>
-              Track your learning progress, attendance, streaks, and resume your courses.
+              Here is your personal learning overview, course progress, and daily achievements.
             </p>
           </div>
-          <Link to="/courses" className="btn btn-primary">
-            <PlusCircle size={18} /> Browse Courses
-          </Link>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setIsAIOpen(true)}
+              className="btn btn-secondary"
+              style={{ gap: '0.4rem', borderColor: '#B87333', color: '#B87333' }}
+            >
+              <Bot size={18} />
+              <span>Ask AI Assistant</span>
+              <Sparkles size={14} color="#B87333" />
+            </button>
+            <Link to="/courses" className="btn btn-primary">
+              <PlusCircle size={18} /> Explore Courses
+            </Link>
+          </div>
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}
+
+        {/* Featured "CONTINUE LEARNING" Hero Banner */}
+        {activeCourseItem && (
+          <div
+            className="card card-hover"
+            style={{
+              background: 'linear-gradient(135deg, #3D291F 0%, #261A14 100%)',
+              color: '#FFFFFF',
+              padding: '1.75rem 2rem',
+              marginBottom: '2.5rem',
+              borderRadius: '16px',
+              display: 'grid',
+              gridTemplateColumns: '1.4fr 0.8fr',
+              gap: '2rem',
+              alignItems: 'center',
+              boxShadow: '0 10px 30px rgba(61, 41, 31, 0.25)'
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.65rem' }}>
+                <span style={{ backgroundColor: 'rgba(184, 115, 51, 0.3)', color: '#FBBF24', fontSize: '0.75rem', fontWeight: '700', padding: '0.2rem 0.6rem', borderRadius: '999px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  ▶ Resume Current Lesson
+                </span>
+                <span style={{ color: '#D6D3D1', fontSize: '0.82rem' }}>
+                  {activeCourseItem.course?.category || 'Online Course'}
+                </span>
+              </div>
+              <h2 style={{ color: '#FFFFFF', fontSize: '1.65rem', marginBottom: '0.5rem', fontWeight: '800' }}>
+                {activeCourseItem.course?.title || 'Interactive Course'}
+              </h2>
+              <p style={{ color: '#E7E5E4', fontSize: '0.92rem', marginBottom: '1.25rem', maxWidth: '540px' }}>
+                Instructor: {activeCourseItem.course?.instructor || 'Staff'} • {activeCourseItem.course?.lessons?.length || 5} Interactive Lessons
+              </p>
+
+              <div style={{ maxWidth: '420px', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.4rem', color: '#E7E5E4' }}>
+                  <span>Course Progress</span>
+                  <strong>{activeCourseItem.progress || 0}%</strong>
+                </div>
+                <div style={{ height: '8px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '999px', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${activeCourseItem.progress || 0}%`, backgroundColor: '#FBBF24', borderRadius: '999px', transition: 'width 0.4s ease' }} />
+                </div>
+              </div>
+
+              <Link
+                to={`/student/course/${activeCourseItem.course?._id || activeCourseItem._id}`}
+                className="btn btn-primary"
+                style={{ backgroundColor: '#B87333', borderColor: '#B87333', color: '#FFFFFF', fontWeight: '700' }}
+              >
+                <PlayCircle size={18} /> Continue Learning in Classroom <ArrowRight size={16} />
+              </Link>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <img
+                src={activeCourseItem.course?.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80'}
+                alt={activeCourseItem.course?.title}
+                style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', borderRadius: '12px', border: '2px solid rgba(255,255,255,0.1)' }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Existing 4 Core Summary Stat Cards */}
         <div className="grid-4" style={{ marginBottom: '2rem' }}>
@@ -259,6 +353,14 @@ const StudentDashboard = () => {
           )}
         </div>
       </div>
+
+      {/* AI Assistant Modal */}
+      <AIAssistantModal
+        isOpen={isAIOpen}
+        onClose={() => setIsAIOpen(false)}
+        course={activeCourseItem?.course}
+        currentLesson={activeCourseItem?.course?.lessons?.[0]}
+      />
     </div>
   );
 };
