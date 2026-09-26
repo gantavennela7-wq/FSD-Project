@@ -13,8 +13,12 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    facultyId: '',
+    studentId: '',
     department: '',
+    branch: '',
+    year: '',
+    semester: '',
+    facultyId: '',
     designation: '',
     qualification: '',
     specialization: '',
@@ -40,6 +44,10 @@ const Register = () => {
       email,
       password,
       confirmPassword,
+      studentId,
+      branch,
+      year,
+      semester,
       facultyId,
       department,
       designation,
@@ -79,6 +87,15 @@ const Register = () => {
         email,
         password,
         role,
+        ...(role === 'student' && {
+          studentId: studentId ? studentId.trim() : '',
+          phone: phone ? phone.trim() : '',
+          department: department ? department.trim() : '',
+          branch: branch ? branch.trim() : '',
+          year: year ? year.trim() : '',
+          semester: semester ? semester.trim() : '',
+          yearSemester: year && semester ? `${year} / Sem ${semester}` : year || semester || ''
+        }),
         ...(role === 'faculty' && {
           facultyId: facultyId || `FAC-${Date.now().toString().slice(-4)}`,
           department,
@@ -106,7 +123,7 @@ const Register = () => {
 
   return (
     <div style={styles.pageWrapper}>
-      <div className="card" style={{ ...styles.authCard, maxWidth: role === 'faculty' ? '680px' : '460px' }}>
+      <div className="card" style={{ ...styles.authCard, maxWidth: '680px' }}>
         <div style={styles.cardHeader}>
           <div style={styles.logoIcon}>
             <BookOpen size={24} color="#FFFFFF" />
@@ -214,6 +231,118 @@ const Register = () => {
               </div>
             </div>
           </div>
+
+          {/* Student Specific Fields */}
+          {role === 'student' && (
+            <div style={styles.facultyFieldsContainer}>
+              <div style={styles.sectionDivider}>
+                <ShieldCheck size={16} color="#B87333" />
+                <span>Student Academic Details</span>
+              </div>
+
+              <div className="grid-2">
+                <div className="form-group">
+                  <label className="form-label">Student ID</label>
+                  <div style={{ position: 'relative' }}>
+                    <Layers size={18} color="#78716C" style={styles.inputIcon} />
+                    <input
+                      type="text"
+                      name="studentId"
+                      className="form-input"
+                      placeholder="e.g. STU-2026-001 (optional)"
+                      value={formData.studentId}
+                      onChange={handleChange}
+                      style={{ paddingLeft: '2.5rem' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Phone Number</label>
+                  <div style={{ position: 'relative' }}>
+                    <Phone size={18} color="#78716C" style={styles.inputIcon} />
+                    <input
+                      type="text"
+                      name="phone"
+                      className="form-input"
+                      placeholder="e.g. +1 555-0123"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      style={{ paddingLeft: '2.5rem' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid-2">
+                <div className="form-group">
+                  <label className="form-label">Department</label>
+                  <div style={{ position: 'relative' }}>
+                    <Briefcase size={18} color="#78716C" style={styles.inputIcon} />
+                    <input
+                      type="text"
+                      name="department"
+                      className="form-input"
+                      placeholder="e.g. Computer Science & Engineering"
+                      value={formData.department}
+                      onChange={handleChange}
+                      style={{ paddingLeft: '2.5rem' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Branch / Major</label>
+                  <div style={{ position: 'relative' }}>
+                    <GraduationCap size={18} color="#78716C" style={styles.inputIcon} />
+                    <input
+                      type="text"
+                      name="branch"
+                      className="form-input"
+                      placeholder="e.g. Information Technology"
+                      value={formData.branch}
+                      onChange={handleChange}
+                      style={{ paddingLeft: '2.5rem' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid-2">
+                <div className="form-group">
+                  <label className="form-label">Academic Year</label>
+                  <div style={{ position: 'relative' }}>
+                    <Calendar size={18} color="#78716C" style={styles.inputIcon} />
+                    <input
+                      type="text"
+                      name="year"
+                      className="form-input"
+                      placeholder="e.g. 3rd Year"
+                      value={formData.year}
+                      onChange={handleChange}
+                      style={{ paddingLeft: '2.5rem' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Semester</label>
+                  <div style={{ position: 'relative' }}>
+                    <Award size={18} color="#78716C" style={styles.inputIcon} />
+                    <input
+                      type="text"
+                      name="semester"
+                      className="form-input"
+                      placeholder="e.g. Semester 5"
+                      value={formData.semester}
+                      onChange={handleChange}
+                      style={{ paddingLeft: '2.5rem' }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Faculty Specific Fields */}
           {role === 'faculty' && (

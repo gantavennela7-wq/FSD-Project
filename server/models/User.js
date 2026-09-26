@@ -30,7 +30,27 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    studentId: {
+      type: String,
+      trim: true
+    },
     department: {
+      type: String,
+      trim: true
+    },
+    branch: {
+      type: String,
+      trim: true
+    },
+    year: {
+      type: String,
+      trim: true
+    },
+    semester: {
+      type: String,
+      trim: true
+    },
+    yearSemester: {
       type: String,
       trim: true
     },

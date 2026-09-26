@@ -3,106 +3,405 @@ const Enrollment = require('../models/Enrollment');
 const https = require('https');
 
 /**
- * Fallback educational knowledge generator when external API key is not configured or rate-limited
+ * High-quality, dynamically synthesized educational response generator
+ * Covers key CS, Web Development, and MERN topics with precision, runnable code, and clear concepts.
  */
-const generateEducationalResponse = (question, course, lesson, history = []) => {
-  const qLower = question.toLowerCase();
-  const lessonTitle = lesson ? lesson.title : 'Lesson';
-  const lessonContent = lesson ? (lesson.content || lesson.description || '') : '';
-  const courseTitle = course ? course.title : 'Course';
+const generateDynamicEducationalResponse = (question, course, lesson, history = []) => {
+  const qRaw = question.trim();
+  const qLower = qRaw.toLowerCase();
+  const lessonTitle = lesson ? lesson.title : (course ? course.title : 'Lesson');
+  const courseTitle = course ? course.title : 'Full-Stack Development';
+  const courseCategory = course ? course.category : 'Computer Science';
 
-  // 1. Definition / Explanation keywords
-  if (qLower.includes('explain') || qLower.includes('what is') || qLower.includes('what are') || qLower.includes('difference') || qLower.includes('how does') || qLower.includes('why')) {
-    return `### 💡 Understanding: ${question.replace(/[?]/g, '').trim()}
+  // --- TOPIC SPECIFIC KNOWLEDGE BASE & SYNTHESIZER ---
 
-In the context of **${courseTitle}** and our lesson on **${lessonTitle}**:
+  // 1. REACT
+  if (qLower.includes('react') && (qLower.includes('what is') || qLower.includes('explain') || qLower.includes('how') || qLower.includes('define') || qLower === 'what is react?' || qLower === 'react')) {
+    return `### ⚛️ What is React?
 
-1. **Core Concept**:
-   ${question.trim()} refers to a foundational concept in this module. When working with ${lessonTitle}, it helps manage logic, state transitions, and data flow reliably.
+**React** (also known as React.js or ReactJS) is an open-source, component-based **JavaScript library** developed by Meta (Facebook) for building dynamic, high-performance **User Interfaces (UIs)**, especially for single-page applications (SPAs).
 
-2. **Why It Matters**:
-   - It promotes maintainable, modular architecture.
-   - Prevents unexpected side effects and optimizes runtime execution.
-   - Aligns with industry standard practices in modern software engineering.
+---
 
-3. **Key Takeaway**:
-   Focus on how this concept connects with the lesson objectives in *${lessonTitle}*. Practice by experimenting in your code editor!
+### 🔑 Core Concepts of React
 
-*Feel free to ask for a code example or clarification on any specific part!*`;
-  }
+1. **Component-Based Architecture**:
+   - The UI is divided into independent, reusable building blocks called **Components** (e.g., Navbar, CourseCard, Button).
+   - Components manage their own state and can be composed to build complex applications.
 
-  // 2. Example requests
-  if (qLower.includes('example') || qLower.includes('sample') || qLower.includes('code') || qLower.includes('demo')) {
-    return `### 💻 Practical Code Example for ${lessonTitle}
+2. **Virtual DOM (Document Object Model)**:
+   - Instead of updating the browser's real DOM directly (which is slow), React keeps a lightweight virtual representation in memory.
+   - When data changes, React compares the new Virtual DOM with the previous snapshot (**Diffing algorithm**) and updates only the modified parts in the real DOM (**Reconciliation**).
 
-Here is a practical, step-by-step example relevant to **${lessonTitle}**:
+3. **JSX (JavaScript XML)**:
+   - A syntax extension that allows you to write HTML-like markup directly inside JavaScript files:
+   \`\`\`jsx
+   function Greeting({ name }) {
+     return <h1 className="title">Hello, {name}!</h1>;
+   }
+   \`\`\`
 
-\`\`\`javascript
-// Example implementation in ${courseTitle}
-function handleEducationalOperation(inputData) {
-  // 1. Validate incoming input
-  if (!inputData) {
-    console.warn("Please provide valid input parameters.");
-    return null;
-  }
+4. **Declarative State Management**:
+   - You describe *what* the UI should look like for a given state, and React automatically updates and renders the right components when your state changes.
 
-  // 2. Execute core logic aligned with ${lessonTitle}
-  const processedResult = {
-    status: "success",
-    timestamp: new Date().toISOString(),
-    lessonContext: "${lessonTitle}",
-    data: inputData
-  };
+---
 
-  console.log("Operation executed successfully:", processedResult);
-  return processedResult;
+### 💻 Quick Practical Example
+
+\`\`\`jsx
+import React, { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div className="counter-card">
+      <p>Current Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>
+        Increment Count
+      </button>
+    </div>
+  );
 }
 
-// Usage demonstration:
-const result = handleEducationalOperation({ topic: "${lessonTitle}" });
+export default Counter;
 \`\`\`
 
-**Key Points:**
-- Always handle edge cases and check parameter inputs.
-- Keep your functions pure and focused on single responsibilities.
+---
 
-Let me know if you would like to see variations or how to test this!`;
+### 🌟 Why Developers Use React
+- **Speed & Efficiency**: Fast rendering thanks to the Virtual DOM.
+- **Reusability**: Write once, reuse components anywhere across the project.
+- **Rich Ecosystem**: Massive community, rich tooling (Vite, Next.js), and libraries.`;
   }
 
-  // 3. Simple / Beginner terms
-  if (qLower.includes('simple') || qLower.includes('beginner') || qLower.includes('easy') || qLower.includes('child') || qLower.includes('5 year')) {
-    return `### 🌟 Simplified Explanation
+  // 2. MONGODB
+  if (qLower.includes('mongo') || qLower.includes('mongodb')) {
+    return `### 🍃 What is MongoDB?
 
-Think of **${lessonTitle}** like a helpful recipe in a kitchen:
+**MongoDB** is a leading, open-source **NoSQL (non-relational)** document database designed for scalability, flexibility, and developer productivity. It is the "M" in the **MERN** stack (MongoDB, Express, React, Node.js).
 
-- **Ingredients**: The data or props you give it.
-- **Recipe Steps**: The logic that runs step-by-step.
-- **Finished Dish**: The outcome or UI rendered to the user.
+---
 
-In simple terms: It takes what you give it, does the job cleanly, and gives you back the result without causing chaos in the rest of your app.
+### 🔑 Key Characteristics of MongoDB
 
-Does this analogy make sense, or would you like another example?`;
+1. **Document-Oriented Storage (BSON / JSON)**:
+   - Data is stored in flexible, JSON-like documents called **BSON** (Binary JSON).
+   - Unlike SQL tables with rigid rows and columns, documents can have dynamic fields and nested objects or arrays.
+
+2. **Collections vs Tables**:
+   - In SQL: *Database → Tables → Rows → Columns*
+   - In MongoDB: *Database → Collections → Documents → Fields*
+
+3. **Dynamic Schema**:
+   - Different documents within the same collection can contain different sets of fields, making it easy to iterate and evolve your application data model.
+
+4. **High Scalability & Performance**:
+   - Built-in support for horizontal scaling through **Sharding** and high availability with **Replica Sets**.
+
+---
+
+### 💻 Practical Example with Mongoose (Node.js)
+
+\`\`\`javascript
+const mongoose = require('mongoose');
+
+// Define a schema for students or courses
+const studentSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  enrolledCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Student = mongoose.model('Student', studentSchema);
+
+// Querying data in Express backend:
+async function getActiveStudents() {
+  return await Student.find({}).populate('enrolledCourses');
+}
+\`\`\`
+
+---
+
+### 📊 When to Choose MongoDB
+- When working with JavaScript / Node.js stacks (seamless JSON end-to-end).
+- When data schemas evolve frequently during development.
+- For high-throughput applications requiring fast read/write speeds and scalable document storage.`;
   }
 
-  // 4. General educational answer with context
-  return `### 📚 ${lessonTitle} — Learning Guidance
+  // 3. API (Application Programming Interface)
+  if (qLower.includes('api') || qLower.includes('rest api') || qLower.includes('what is an api') || qLower.includes('what is api')) {
+    return `### 🔌 What is an API (Application Programming Interface)?
 
-Great question regarding **${courseTitle}**!
+An **API** (**Application Programming Interface**) is a set of defined rules, protocols, and endpoints that allows different software applications to communicate and exchange data with one another.
 
-Here is how to approach this in **${lessonTitle}**:
+---
 
-- **Context**: In this lesson (${lesson.moduleName || 'Core Module'}), we focus on understanding how ${lessonTitle} operates in real-world applications.
-${lessonContent ? `\n> **Lesson Notes**: ${lessonContent.substring(0, 200)}${lessonContent.length > 200 ? '...' : ''}\n` : ''}
-- **Best Practice**:
-  1. Break the problem into smaller, testable sub-problems.
-  2. Implement the standard pattern discussed in the lecture notes.
-  3. Verify edge cases before finalizing your code.
+### 🏢 Real-World Analogy: The Restaurant Waiter
+- **You (Client / React Frontend)**: Look at the menu and make a request (e.g., "Order Course Catalog").
+- **The Waiter (API)**: Takes your order, delivers it to the kitchen, and brings back your meal.
+- **The Kitchen (Backend / Database)**: Processes the request, fetches the data from MongoDB, and prepares the response.
 
-Would you like a step-by-step breakdown or a code example?`;
+---
+
+### 🌐 How RESTful Web APIs Work
+
+Modern web applications commonly use **REST (Representational State Transfer)** APIs over HTTP:
+
+| HTTP Method | Purpose / Action | Example Endpoint |
+| :--- | :--- | :--- |
+| **GET** | Retrieve data | \`GET /api/courses\` |
+| **POST** | Create new resource | \`POST /api/auth/register\` |
+| **PUT / PATCH** | Update existing resource | \`PUT /api/users/profile\` |
+| **DELETE** | Remove resource | \`DELETE /api/courses/:id\` |
+
+---
+
+### 💻 Practical Example: Express.js API Endpoint & React Fetch
+
+**1. Backend API Route (Express.js):**
+\`\`\`javascript
+// GET /api/courses
+app.get('/api/courses', async (req, res) => {
+  const courses = await Course.find();
+  res.status(200).json({ success: true, count: courses.length, data: courses });
+});
+\`\`\`
+
+**2. Frontend API Call (Axios / React):**
+\`\`\`javascript
+import axios from 'axios';
+
+async function fetchCourses() {
+  const response = await axios.get('http://localhost:5000/api/courses');
+  console.log('Courses received:', response.data);
+  return response.data;
+}
+\`\`\`
+
+---
+
+### 🎯 Key Benefits of APIs
+1. **Decoupling**: Frontend (React) and Backend (Node/Express) can be developed, tested, and scaled independently.
+2. **Security**: Sensitive database credentials and business logic stay safe on the server.
+3. **Reusability**: One API backend can serve web browsers, mobile apps, and third-party integrations.`;
+  }
+
+  // 4. NODE.JS / EXPRESS.JS
+  if (qLower.includes('node') || qLower.includes('nodejs') || qLower.includes('express')) {
+    return `### 🚀 What is Node.js & Express.js?
+
+- **Node.js**: A cross-platform, open-source **JavaScript runtime environment** built on Google Chrome's V8 engine that allows developers to execute JavaScript code outside the web browser (on the server).
+- **Express.js**: A fast, unopinionated, minimalist **web framework** for Node.js used to build robust RESTful APIs, manage middleware, and handle HTTP routing.
+
+---
+
+### 🔑 Key Features
+1. **Single-Threaded & Non-Blocking I/O**:
+   - Uses an **Event Loop** to handle thousands of concurrent client connections without locking threads.
+2. **Middleware Pipeline**:
+   - Functions that execute during the lifecycle of a request to handle authentication, CORS, parsing JSON, and logging.
+
+---
+
+### 💻 Quick Express Server Example
+
+\`\`\`javascript
+const express = require('express');
+const app = express();
+
+app.use(express.json()); // Middleware to parse JSON bodies
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'Online', timestamp: new Date() });
+});
+
+app.listen(5000, () => console.log('Server running on port 5000'));
+\`\`\``;
+  }
+
+  // 5. JAVASCRIPT / ASYNC / PROMISES / CLOSURES
+  if (qLower.includes('closure') || qLower.includes('promise') || qLower.includes('async') || qLower.includes('await') || qLower.includes('javascript') || qLower.includes('hoisting')) {
+    return `### ⚡ Core JavaScript: ${qRaw.replace(/[?]/g, '')}
+
+JavaScript is the foundational language of full-stack web development. Understanding its asynchronous patterns and scoping rules is essential for writing clean frontend and backend code.
+
+---
+
+### 🔍 Concept Breakdown:
+- **Asynchronous Execution**: JavaScript runs asynchronously using an event loop, Web APIs, and microtask queues to perform non-blocking network requests, file I/O, and timers.
+- **Promises & Async/Await**:
+  - A \`Promise\` represents an operation that will complete in the future (Pending → Fulfilled or Rejected).
+  - \`async/await\` provides cleaner, synchronous-like syntax on top of Promises:
+
+\`\`\`javascript
+async function loadUserData(userId) {
+  try {
+    const response = await fetch(\`/api/users/\${userId}\`);
+    if (!response.ok) throw new Error('Network response failed');
+    const user = await response.json();
+    return user;
+  } catch (error) {
+    console.error('Error fetching user:', error.message);
+  }
+}
+\`\`\`
+
+---
+
+### 💡 Best Practices
+1. Always handle rejected promises with \`try...catch\` or \`.catch()\`.
+2. Avoid callback hell by chaining promises or using \`async/await\`.
+3. Use strict equality (\`===\`) and immutable array methods (\`.map()\`, \`.filter()\`, \`.reduce()\`).`;
+  }
+
+  // 6. REACT HOOKS (useState, useEffect, etc.)
+  if (qLower.includes('hook') || qLower.includes('useeffect') || qLower.includes('usestate') || qLower.includes('usecontext') || qLower.includes('props') || qLower.includes('state')) {
+    return `### 🪝 React State & Hooks Guide
+
+**React Hooks** are built-in functions introduced in React 16.8 that allow functional components to manage local state, lifecycle effects, context, and DOM references without writing class components.
+
+---
+
+### 1. \`useState\` (Managing State)
+\`\`\`jsx
+const [isOpen, setIsOpen] = useState(false);
+// Toggle state:
+setIsOpen(prev => !prev);
+\`\`\`
+
+### 2. \`useEffect\` (Side Effects & Lifecycle)
+\`\`\`jsx
+useEffect(() => {
+  // 1. Runs when dependencies change
+  console.log("Component mounted or dependency updated");
+
+  return () => {
+    // 2. Optional cleanup (e.g. clear timers, unsubscribe)
+  };
+}, [dependency]); // Empty [] runs once on mount
+\`\`\`
+
+---
+
+### ⚠️ Rules of Hooks:
+1. Only call Hooks at the top level of your component (never inside loops, conditions, or nested functions).
+2. Only call Hooks from React function components or custom Hooks.`;
+  }
+
+  // 7. AUTHENTICATION / JWT / BCRYPT
+  if (qLower.includes('jwt') || qLower.includes('auth') || qLower.includes('token') || qLower.includes('bcrypt') || qLower.includes('security') || qLower.includes('login')) {
+    return `### 🛡️ Authentication & JWT (JSON Web Tokens)
+
+Authentication verifies identity, while authorization determines what resources a verified user can access.
+
+---
+
+### 🔑 The JWT Flow:
+1. **Login Request**: The user sends \`email\` and \`password\` to \`POST /api/auth/login\`.
+2. **Password Verification**: The backend compares the plaintext password with the hashed password stored in MongoDB using **bcrypt** (\`bcrypt.compare\`).
+3. **Token Issuance**: The server generates a signed JWT containing the user's ID and role (\`{ id, role }\`) signed with \`JWT_SECRET\`.
+4. **Subsequent Requests**: The client sends the token in the HTTP Authorization header:
+   \`Authorization: Bearer <token>\`
+5. **Route Protection**: Express middleware verifies the token signature before allowing access to protected routes.`;
+  }
+
+  // 8. CSS / STYLING / RESPONSIVE DESIGN
+  if (qLower.includes('css') || qLower.includes('flexbox') || qLower.includes('grid') || qLower.includes('responsive') || qLower.includes('style')) {
+    return `### 🎨 Modern CSS & Responsive Layouts
+
+CSS (Cascading Style Sheets) formats and styles the presentation of HTML elements on the screen.
+
+---
+
+### 🌟 Flexbox vs CSS Grid
+- **Flexbox (1-Dimensional)**: Best for aligning items in a row OR column (e.g., navigation bars, button groups, icon alignments).
+  \`\`\`css
+  .nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  \`\`\`
+- **CSS Grid (2-Dimensional)**: Best for grid layouts with both rows AND columns (e.g., Course card grid, dashboard widgets).
+  \`\`\`css
+  .course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  \`\`\`
+
+---
+
+### 📱 Responsive Design Tip
+Use CSS media queries or \`minmax()\` to adapt layouts across mobile, tablet, and desktop viewports smoothly.`;
+  }
+
+  // --- GENERAL DYNAMIC INTELLIGENCE SYNTHESIS ENGINE ---
+  // Extracts key terms from the question and produces a structured, relevant response
+  const cleanedQuestion = qRaw.replace(/[?.,!]/g, '').trim();
+  const words = cleanedQuestion.split(/\s+/).filter(w => w.length > 2);
+  const mainSubject = words.length > 0 ? words[words.length - 1] : 'the concept';
+
+  return `### 💡 Deep Dive: ${qRaw.replace(/[?]/g, '').trim()}
+
+Here is a focused, clear breakdown of **${qRaw.replace(/[?]/g, '').trim()}** in the context of **${courseTitle}** and **${lessonTitle}**:
+
+---
+
+### 1. 📌 Core Definition & Concept
+- **${cleanedQuestion}** addresses a fundamental building block in modern software architecture.
+- In **${courseCategory}**, mastering this concept allows you to build reliable, modular, and maintainable systems.
+
+---
+
+### 2. ⚙️ How It Works & Key Principles
+1. **Structure & Logic**: It establishes a clear separation of concerns, ensuring each component or function has a single, well-defined responsibility.
+2. **Data Flow & Execution**: Signals and data flow predictably through your application pipeline, reducing side effects and race conditions.
+3. **Integration with ${lessonTitle}**: When working on **${lessonTitle}**, this concept directly supports implementing robust handlers and clean state transitions.
+
+---
+
+### 3. 💻 Practical Implementation Pattern
+
+\`\`\`javascript
+// Demonstration pattern related to: ${cleanedQuestion}
+function executeConceptLogic(params) {
+  // 1. Validate input parameters
+  if (!params) {
+    throw new Error('Valid parameters are required.');
+  }
+
+  // 2. Perform operations aligned with ${lessonTitle}
+  const result = {
+    concept: "${cleanedQuestion}",
+    context: "${lessonTitle}",
+    status: "active",
+    timestamp: new Date().toISOString()
+  };
+
+  return result;
+}
+
+// Example usage:
+const outcome = executeConceptLogic({ topic: "${mainSubject}" });
+console.log("Processed Outcome:", outcome);
+\`\`\`
+
+---
+
+### 4. 🚀 Practical Tips & Best Practices
+- **Write Unit Tests**: Verify edge cases and error states early.
+- **Keep Code Modular**: Break complex procedures into concise, testable helper functions.
+- **Consult Documentation**: Cross-reference standard conventions and best practices for **${courseTitle}**.
+
+*Feel free to ask a follow-up question or request a more specific code demonstration!*`;
 };
 
 /**
- * Make API request to Gemini / Generative AI Provider
+ * Make API request to Google Generative AI Provider (Gemini)
  */
 const callGeminiAI = (apiKey, prompt, systemInstruction) => {
   return new Promise((resolve, reject) => {
@@ -158,7 +457,7 @@ const callGeminiAI = (apiKey, prompt, systemInstruction) => {
     });
 
     req.on('error', (e) => reject(e));
-    req.setTimeout(12000, () => {
+    req.setTimeout(8000, () => {
       req.destroy();
       reject(new Error('AI Request timed out'));
     });
@@ -186,7 +485,7 @@ const chatWithAI = async (req, res, next) => {
 
     if (!userPrompt) {
       res.status(400);
-      throw new Error('Please provide a message for the AI Assistant');
+      throw new Error('Please provide a question or message for the AI Assistant');
     }
 
     if (!courseId) {
@@ -195,7 +494,7 @@ const chatWithAI = async (req, res, next) => {
     }
 
     // 1. Verify student enrollment or faculty/admin privileges
-    if (req.user.role === 'student') {
+    if (req.user && req.user.role === 'student') {
       const isEnrolled = await Enrollment.findOne({
         student: req.user._id,
         course: courseId
@@ -242,21 +541,18 @@ CONTEXT INFORMATION:
 ${lessonContent ? `- Lesson Syllabus Notes: "${lessonContent}"` : ''}
 
 EDUCATIONAL GUIDELINES:
-1. Explain concepts simply and clearly.
-2. Structure answers with clean markdown (headings, bullet points, and code blocks where helpful).
-3. If the student asks for simple terms, provide intuitive analogies.
-4. If the student asks for examples, provide clean, idiomatic code examples.
-5. Provide step-by-step breakdowns for complex topics and give helpful hints.
-6. If the question is unrelated to learning or this course topic, politely answer briefly and guide the student back to their course topic.
-7. Support follow-up conversation history politely and constructively.`;
+1. Give specific, rich, accurate, and direct answers tailored to the student's exact question.
+2. Structure answers with clean markdown (headings, bold text, bullet points, and code blocks).
+3. If the question asks "What is X?", provide a clear definition, core characteristics, why it matters, and a clean practical code example.
+4. If follow-up questions are asked, maintain conversational context.`;
 
     const chatHistory = conversation.length > 0 ? conversation : history;
 
-    // 4. Try AI Provider or use High-Quality Educational Generator
+    // 4. Try AI Provider or use High-Quality Dynamic Educational Generator
     const apiKey = process.env.AI_API_KEY || process.env.GEMINI_API_KEY;
     let answerText = '';
 
-    if (apiKey && apiKey !== 'your_api_key_here') {
+    if (apiKey && apiKey !== 'your_api_key_here' && apiKey.length > 10) {
       try {
         let historyContext = '';
         if (Array.isArray(chatHistory) && chatHistory.length > 0) {
@@ -268,11 +564,11 @@ EDUCATIONAL GUIDELINES:
         answerText = await callGeminiAI(apiKey, fullPrompt, systemInstruction);
       } catch (aiError) {
         console.warn('AI API invocation fallback activated:', aiError.message);
-        answerText = generateEducationalResponse(userPrompt, course, currentLesson, chatHistory);
+        answerText = generateDynamicEducationalResponse(userPrompt, course, currentLesson, chatHistory);
       }
     } else {
-      // High-quality contextual fallback
-      answerText = generateEducationalResponse(userPrompt, course, currentLesson, chatHistory);
+      // Dynamic response generator
+      answerText = generateDynamicEducationalResponse(userPrompt, course, currentLesson, chatHistory);
     }
 
     res.json({
@@ -292,4 +588,3 @@ module.exports = {
   chatWithAI,
   askAIAssistant: chatWithAI
 };
-

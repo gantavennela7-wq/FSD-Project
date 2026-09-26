@@ -19,6 +19,11 @@ const registerUser = async (req, res, next) => {
       email,
       password,
       role = 'student',
+      studentId,
+      branch,
+      year,
+      semester,
+      yearSemester,
       facultyId,
       department,
       designation,
@@ -31,7 +36,7 @@ const registerUser = async (req, res, next) => {
 
     if (!name || !email || !password) {
       res.status(400);
-      throw new Error('Please fill in all required fields');
+      throw new Error('Please fill in all required fields (name, email, password)');
     }
 
     if (password.length < 6) {
@@ -43,37 +48,54 @@ const registerUser = async (req, res, next) => {
     const userRole = role === 'faculty' ? 'faculty' : 'student';
 
     // Check duplicate email
-    const userExists = await User.findOne({ email: email.toLowerCase() });
+    const userExists = await User.findOne({ email: email.toLowerCase().trim() });
     if (userExists) {
       res.status(400);
       throw new Error('An account with this email already exists.');
     }
 
+    // If student, check duplicate studentId if provided
+    if (userRole === 'student' && studentId && studentId.trim()) {
+      const studentIdExists = await User.findOne({ studentId: studentId.trim() });
+      if (studentIdExists) {
+        res.status(400);
+        throw new Error('Student ID is already registered to another student.');
+      }
+    }
+
     // If faculty, optionally check duplicate facultyId if provided
-    if (userRole === 'faculty' && facultyId) {
+    if (userRole === 'faculty' && facultyId && facultyId.trim()) {
       const idExists = await User.findOne({ facultyId: facultyId.trim() });
       if (idExists) {
         res.status(400);
-        throw new Error('Faculty ID is already registered to another faculty member');
+        throw new Error('Faculty ID is already registered to another faculty member.');
       }
     }
 
     const userData = {
-      name,
-      email: email.toLowerCase(),
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
       password,
       role: userRole
     };
 
-    if (userRole === 'faculty') {
-      userData.facultyId = facultyId || `FAC-${Date.now().toString().slice(-4)}`;
-      userData.department = department || '';
-      userData.designation = designation || '';
-      userData.qualification = qualification || '';
-      userData.specialization = specialization || '';
-      userData.experience = experience || '';
-      userData.phone = phone || '';
-      userData.bio = bio || '';
+    if (userRole === 'student') {
+      userData.studentId = studentId && studentId.trim() ? studentId.trim() : `STU-${Date.now().toString().slice(-4)}`;
+      userData.department = department ? department.trim() : '';
+      userData.branch = branch ? branch.trim() : '';
+      userData.year = year ? year.trim() : '';
+      userData.semester = semester ? semester.trim() : '';
+      userData.yearSemester = yearSemester || (year && semester ? `${year} / Sem ${semester}` : year || semester || '');
+      userData.phone = phone ? phone.trim() : '';
+    } else if (userRole === 'faculty') {
+      userData.facultyId = facultyId && facultyId.trim() ? facultyId.trim() : `FAC-${Date.now().toString().slice(-4)}`;
+      userData.department = department ? department.trim() : '';
+      userData.designation = designation ? designation.trim() : '';
+      userData.qualification = qualification ? qualification.trim() : '';
+      userData.specialization = specialization ? specialization.trim() : '';
+      userData.experience = experience ? experience.trim() : '';
+      userData.phone = phone ? phone.trim() : '';
+      userData.bio = bio ? bio.trim() : '';
     }
 
     const user = await User.create(userData);
@@ -84,6 +106,11 @@ const registerUser = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        studentId: user.studentId,
+        branch: user.branch,
+        year: user.year,
+        semester: user.semester,
+        yearSemester: user.yearSemester,
         facultyId: user.facultyId,
         department: user.department,
         designation: user.designation,
