@@ -142,14 +142,20 @@ const loginUser = async (req, res, next) => {
       throw new Error('Please provide email and password');
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
 
     if (user && (await user.matchPassword(password))) {
+      if (user.status === 'Inactive') {
+        res.status(403);
+        throw new Error('Your account has been deactivated. Please contact the administrator.');
+      }
+
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        status: user.status,
         token: generateToken(user._id, user.role)
       });
     } else {

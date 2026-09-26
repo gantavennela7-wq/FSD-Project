@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { enrollmentService, attendanceService } from '../services/api';
+import { enrollmentService, attendanceService, quizService } from '../services/api';
 import DashboardCard from '../components/DashboardCard';
 import ProgressBar from '../components/ProgressBar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import AttendanceCalendar from '../components/AttendanceCalendar';
 import LearningMilestones from '../components/LearningMilestones';
 import AIAssistantModal from '../components/AIAssistantModal';
+import CertificateModal from '../components/CertificateModal';
 import {
   BookOpen,
   CheckCircle,
@@ -22,29 +23,38 @@ import {
   Sparkles,
   Bot,
   Compass,
-  ArrowRight
+  ArrowRight,
+  BarChart3,
+  HelpCircle
 } from 'lucide-react';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
   const [enrollments, setEnrollments] = useState([]);
   const [attendanceStats, setAttendanceStats] = useState(null);
+  const [quizPerformances, setQuizPerformances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAIOpen, setIsAIOpen] = useState(false);
+  const [selectedCertCourse, setSelectedCertCourse] = useState(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [enrollmentData, attData] = await Promise.all([
+        const [enrollmentData, attData, quizData] = await Promise.all([
           enrollmentService.getMyEnrollments(),
           attendanceService.getMyStats().catch((err) => {
             console.error('Attendance fetch error:', err);
             return null;
+          }),
+          quizService.getMyPerformance().catch((err) => {
+            console.error('Quiz perf fetch error:', err);
+            return { performances: [] };
           })
         ]);
         setEnrollments(enrollmentData);
         setAttendanceStats(attData);
+        setQuizPerformances(quizData?.performances || []);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load your dashboard data.');
       } finally {
@@ -217,6 +227,142 @@ const StudentDashboard = () => {
           />
         </div>
 
+        {/* ================= FEATURE 3: STUDENT PROGRESS ANALYTICS ================= */}
+        <div style={{ marginBottom: '3rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
+            <BarChart3 size={22} color="#3D291F" />
+            <h2 style={{ margin: 0, fontSize: '1.45rem' }}>Learning Analytics & Progress Overview</h2>
+          </div>
+
+          {/* 3 Learning Overview Metric Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.75rem' }}>
+            <div className="card" style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: '#FFFFFF', border: '1.5px solid #E7E5E4', borderRadius: '12px' }}>
+              <span style={{ fontSize: '2.5rem', fontWeight: '800', color: '#3D291F', lineHeight: '1.1', display: 'block' }}>
+                {totalEnrolled}
+              </span>
+              <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#78716C', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Enrolled
+              </span>
+            </div>
+
+            <div className="card" style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: '#FFFFFF', border: '1.5px solid #E7E5E4', borderRadius: '12px' }}>
+              <span style={{ fontSize: '2.5rem', fontWeight: '800', color: '#B87333', lineHeight: '1.1', display: 'block' }}>
+                {averageProgress}%
+              </span>
+              <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#78716C', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Avg Progress
+              </span>
+            </div>
+
+            <div className="card" style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: '#FFFFFF', border: '1.5px solid #E7E5E4', borderRadius: '12px' }}>
+              <span style={{ fontSize: '2.5rem', fontWeight: '800', color: '#15803D', lineHeight: '1.1', display: 'block' }}>
+                {completedCourses}
+              </span>
+              <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#78716C', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Completed
+              </span>
+            </div>
+          </div>
+
+          {/* Course Progress & Quiz Performance 2-Column Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+            {/* Course Progress List */}
+            <div className="card" style={{ padding: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #F3EFEA', paddingBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '1.1rem', margin: 0, color: '#3D291F', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <TrendingUp size={18} color="#B87333" /> Course Progress
+                </h3>
+                <span style={{ fontSize: '0.8rem', color: '#78716C', fontWeight: '600' }}>
+                  {enrollments.length} {enrollments.length === 1 ? 'Course' : 'Courses'}
+                </span>
+              </div>
+
+              {enrollments.length === 0 ? (
+                <p style={{ color: '#78716C', fontSize: '0.9rem', margin: 0 }}>No course enrollments found.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                  {enrollments.map((enr) => {
+                    const cTitle = enr.course?.title || 'Course';
+                    const prog = enr.progress || 0;
+                    return (
+                      <div key={enr._id}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem', fontSize: '0.9rem' }}>
+                          <span style={{ fontWeight: '600', color: '#1C1917', maxWidth: '70%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={cTitle}>
+                            {cTitle}
+                          </span>
+                          <span style={{ fontWeight: '700', color: prog === 100 ? '#15803D' : '#3D291F' }}>
+                            {prog}%
+                          </span>
+                        </div>
+                        <div style={{ height: '8px', backgroundColor: '#F3EFEA', borderRadius: '999px', overflow: 'hidden' }}>
+                          <div style={{
+                            height: '100%',
+                            width: `${prog}%`,
+                            backgroundColor: prog === 100 ? '#15803D' : '#B87333',
+                            borderRadius: '999px',
+                            transition: 'width 0.5s ease'
+                          }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Quiz Performance List */}
+            <div className="card" style={{ padding: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #F3EFEA', paddingBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '1.1rem', margin: 0, color: '#3D291F', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <HelpCircle size={18} color="#B87333" /> Quiz Performance
+                </h3>
+                <span style={{ fontSize: '0.8rem', color: '#78716C', fontWeight: '600' }}>
+                  {quizPerformances.length} {quizPerformances.length === 1 ? 'Attempt' : 'Attempts'}
+                </span>
+              </div>
+
+              {quizPerformances.length === 0 ? (
+                <div style={{ padding: '1.5rem 0', textAlign: 'center', color: '#78716C' }}>
+                  <p style={{ fontSize: '0.9rem', margin: '0 0 0.5rem 0' }}>No quiz attempts recorded yet.</p>
+                  <span style={{ fontSize: '0.8rem' }}>Take quizzes inside your courses to track test scores!</span>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                  {quizPerformances.map((perf, idx) => (
+                    <div key={idx}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem', fontSize: '0.9rem' }}>
+                        <span style={{ fontWeight: '600', color: '#1C1917', maxWidth: '70%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {perf.courseTitle}
+                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '0.75rem', color: '#78716C' }}>
+                            ({perf.score}/{perf.totalQuestions})
+                          </span>
+                          <span style={{
+                            fontWeight: '700',
+                            color: perf.percentage >= 70 ? '#15803D' : '#B87333'
+                          }}>
+                            {perf.percentage}%
+                          </span>
+                        </div>
+                      </div>
+                      <div style={{ height: '8px', backgroundColor: '#F3EFEA', borderRadius: '999px', overflow: 'hidden' }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${perf.percentage}%`,
+                          backgroundColor: perf.percentage >= 70 ? '#15803D' : '#B87333',
+                          borderRadius: '999px',
+                          transition: 'width 0.5s ease'
+                        }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Learning Streak & Attendance Cards Section (3 Cards) */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
           {/* Card 1: Learning Streak */}
@@ -301,6 +447,7 @@ const StudentDashboard = () => {
             <div className="grid-2">
               {enrollments.map((item) => {
                 const course = item.course || {};
+                const isCompleted = item.status === 'Completed' || item.progress === 100;
                 return (
                   <div key={item._id} className="card card-hover" style={styles.courseItemCard}>
                     <div style={styles.thumbnailWrapper}>
@@ -312,7 +459,7 @@ const StudentDashboard = () => {
                     </div>
                     <div style={styles.itemContent}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <span className={`badge ${item.status === 'Completed' ? 'badge-success' : 'badge-primary'}`}>
+                        <span className={`badge ${isCompleted ? 'badge-success' : 'badge-primary'}`}>
                           {item.status}
                         </span>
                         <span style={{ fontSize: '0.8rem', color: '#78716C' }}>{course.category}</span>
@@ -326,13 +473,26 @@ const StudentDashboard = () => {
                           <ProgressBar progress={item.progress} />
                         </div>
 
-                        <Link
-                          to={`/student/course/${course._id || item._id}`}
-                          className="btn btn-primary btn-sm"
-                          style={{ width: '100%', marginTop: '0.75rem' }}
-                        >
-                          <PlayCircle size={16} /> Continue Learning
-                        </Link>
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                          <Link
+                            to={`/student/course/${course._id || item._id}`}
+                            className="btn btn-primary btn-sm"
+                            style={{ flex: 1, minWidth: '140px', justifyContent: 'center' }}
+                          >
+                            <PlayCircle size={16} /> Continue Learning
+                          </Link>
+
+                          {isCompleted && (
+                            <button
+                              onClick={() => setSelectedCertCourse({ course, enrollment: item })}
+                              className="btn btn-secondary btn-sm"
+                              style={{ display: 'flex', alignItems: 'center', gap: '4px', borderColor: '#B87333', color: '#B87333' }}
+                              title="View Certificate"
+                            >
+                              <Award size={15} /> Certificate
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -361,6 +521,18 @@ const StudentDashboard = () => {
         course={activeCourseItem?.course}
         currentLesson={activeCourseItem?.course?.lessons?.[0]}
       />
+
+      {/* Certificate Modal */}
+      {selectedCertCourse && (
+        <CertificateModal
+          isOpen={!!selectedCertCourse}
+          onClose={() => setSelectedCertCourse(null)}
+          studentName={user?.name}
+          courseTitle={selectedCertCourse.course?.title}
+          completionDate={selectedCertCourse.enrollment?.updatedAt}
+          certificateId={`EV-${(selectedCertCourse.enrollment?._id || selectedCertCourse.course?._id || '').toString().slice(-6).toUpperCase()}`}
+        />
+      )}
     </div>
   );
 };

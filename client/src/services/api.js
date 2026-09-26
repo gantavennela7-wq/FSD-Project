@@ -195,6 +195,58 @@ export const adminService = {
   deleteFaculty: async (id) => {
     const response = await api.delete(`/admin/faculty/${id}`);
     return response.data;
+  },
+  getAllUsers: async (params = {}) => {
+    const response = await api.get('/admin/users', { params });
+    return response.data;
+  },
+  getUserById: async (id) => {
+    const response = await api.get(`/admin/users/${id}`);
+    return response.data;
+  },
+  updateUser: async (id, userData) => {
+    const response = await api.put(`/admin/users/${id}`, userData);
+    return response.data;
+  },
+  toggleUserStatus: async (id, status) => {
+    const response = await api.patch(`/admin/users/${id}/status`, { status });
+    return response.data;
+  }
+};
+
+// Quiz Service
+export const quizService = {
+  getQuizByCourse: async (courseId) => {
+    const response = await api.get(`/quizzes/course/${courseId}`);
+    return response.data;
+  },
+  submitQuiz: async (quizId, answers) => {
+    const response = await api.post(`/quizzes/${quizId}/submit`, { answers });
+    return response.data;
+  },
+  getAttempts: async (courseId) => {
+    const response = await api.get(`/quizzes/course/${courseId}/attempts`);
+    return response.data;
+  },
+  getMyPerformance: async () => {
+    const response = await api.get('/quizzes/my-performance');
+    return response.data;
+  }
+};
+
+// Notification Service
+export const notificationService = {
+  getNotifications: async () => {
+    const response = await api.get('/notifications');
+    return response.data;
+  },
+  markAsRead: async (id) => {
+    const response = await api.patch(`/notifications/${id}/read`);
+    return response.data;
+  },
+  markAllAsRead: async () => {
+    const response = await api.patch('/notifications/mark-all-read');
+    return response.data;
   }
 };
 

@@ -338,6 +338,193 @@ const getAdminStats = async (req, res, next) => {
   }
 };
 
+// @desc    Get all users (Students & Faculty) with search and filters
+// @route   GET /api/admin/users
+// @access  Private/Admin
+const getAllUsers = async (req, res, next) => {
+  try {
+    const { search, role, status } = req.query;
+    let query = { role: { $in: ['student', 'faculty'] } };
+
+    if (role && role !== 'all' && ['student', 'faculty'].includes(role)) {
+      query.role = role;
+    }
+
+    if (status && status !== 'all' && ['Active', 'Inactive'].includes(status)) {
+      query.status = status;
+    }
+
+    if (search && search.trim()) {
+      const term = search.trim();
+      query.$or = [
+        { name: { $regex: term, $options: 'i' } },
+        { email: { $regex: term, $options: 'i' } },
+        { studentId: { $regex: term, $options: 'i' } },
+        { facultyId: { $regex: term, $options: 'i' } },
+        { department: { $regex: term, $options: 'i' } },
+        { branch: { $regex: term, $options: 'i' } },
+        { designation: { $regex: term, $options: 'i' } }
+      ];
+    }
+
+    const users = await User.find(query).select('-password').sort({ createdAt: -1 });
+
+    const usersWithStats = await Promise.all(
+      users.map(async (u) => {
+        const userObj = u.toObject();
+        if (u.role === 'student') {
+          const enrollments = await Enrollment.find({ student: u._id }).populate('course', 'title');
+          userObj.enrollmentCount = enrollments.length;
+          userObj.enrolledCourses = enrollments.map((e) => (e.course ? e.course.title : 'Course'));
+        } else if (u.role === 'faculty') {
+          const courses = await Course.find({
+            $or: [{ instructor: u._id }, { instructorName: u.name }]
+          });
+          userObj.courseCount = courses.length;
+          userObj.courses = courses.map((c) => c.title);
+        }
+        return userObj;
+      })
+    );
+
+    res.json(usersWithStats);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get single user details by ID
+// @route   GET /api/admin/users/:id
+// @access  Private/Admin
+const getUserById = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    const userObj = user.toObject();
+    if (user.role === 'student') {
+      const enrollments = await Enrollment.find({ student: user._id }).populate('course', 'title category progress');
+      userObj.enrollments = enrollments;
+    } else if (user.role === 'faculty') {
+      const courses = await Course.find({
+        $or: [{ instructor: user._id }, { instructorName: user.name }]
+      });
+      userObj.courses = courses;
+    }
+
+    res.json(userObj);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update user profile data by Admin
+// @route   PUT /api/admin/users/:id
+// @access  Private/Admin
+const updateUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    const {
+      name,
+      department,
+      branch,
+      year,
+      semester,
+      studentId,
+      facultyId,
+      designation,
+      qualification,
+      specialization,
+      experience,
+      phone,
+      bio,
+      status
+    } = req.body;
+
+    if (name) user.name = name.trim();
+    if (department !== undefined) user.department = department.trim();
+    if (branch !== undefined) user.branch = branch.trim();
+    if (year !== undefined) user.year = year.trim();
+    if (semester !== undefined) user.semester = semester.trim();
+    if (studentId !== undefined) user.studentId = studentId.trim();
+    if (facultyId !== undefined) user.facultyId = facultyId.trim();
+    if (designation !== undefined) user.designation = designation.trim();
+    if (qualification !== undefined) user.qualification = qualification.trim();
+    if (specialization !== undefined) user.specialization = specialization.trim();
+    if (experience !== undefined) user.experience = experience.trim();
+    if (phone !== undefined) user.phone = phone.trim();
+    if (bio !== undefined) user.bio = bio.trim();
+    if (status && ['Active', 'Inactive'].includes(status)) {
+      user.status = status;
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      status: updatedUser.status,
+      department: updatedUser.department,
+      designation: updatedUser.designation,
+      studentId: updatedUser.studentId,
+      facultyId: updatedUser.facultyId,
+      phone: updatedUser.phone,
+      message: 'User profile updated successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Toggle user active/inactive status
+// @route   PUT /api/admin/users/:id/status
+// @access  Private/Admin
+const toggleUserStatus = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    // Do not allow deactivating other admin accounts directly
+    if (user.role === 'admin') {
+      res.status(400);
+      throw new Error('Admin accounts cannot be deactivated');
+    }
+
+    const { status } = req.body;
+    if (status && ['Active', 'Inactive'].includes(status)) {
+      user.status = status;
+    } else {
+      user.status = user.status === 'Active' ? 'Inactive' : 'Active';
+    }
+
+    await user.save();
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      message: `User status changed to ${user.status}`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getStudents,
   getFaculty,
@@ -345,5 +532,9 @@ module.exports = {
   createFaculty,
   updateFaculty,
   deleteFaculty,
-  getAdminStats
+  getAdminStats,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  toggleUserStatus
 };

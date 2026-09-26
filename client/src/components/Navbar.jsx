@@ -1,13 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, User as UserIcon, LogOut, Menu, X, Shield, LayoutDashboard, BookmarkCheck, Users } from 'lucide-react';
+import { 
+  BookOpen, User as UserIcon, LogOut, Menu, X, Shield, 
+  LayoutDashboard, BookmarkCheck, Users, Bell, Check, CheckCheck, 
+  Sparkles, Award, HelpCircle, ExternalLink 
+} from 'lucide-react';
+import { notificationService } from '../services/api';
 
 const Navbar = () => {
   const { user, isAuthenticated, isAdmin, isFaculty, isStudent, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  
+  // Notification states
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [loadingNotifs, setLoadingNotifs] = useState(false);
+  const notifRef = useRef(null);
+
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    if (!isAuthenticated) return;
+    try {
+      const data = await notificationService.getNotifications();
+      if (data.success) {
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.unreadCount || 0);
+      }
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 30000); // Polling every 30s
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setIsNotifOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleMarkAllRead = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error('Failed to mark all as read:', err);
+    }
+  };
+
+  const handleNotificationClick = async (notif) => {
+    if (!notif.isRead) {
+      try {
+        await notificationService.markAsRead(notif._id);
+        setNotifications(prev => prev.map(n => n._id === notif._id ? { ...n, isRead: true } : n));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      } catch (err) {
+        console.error('Failed to mark notification as read:', err);
+      }
+    }
+    setIsNotifOpen(false);
+    if (notif.link) {
+      navigate(notif.link);
+    }
+  };
+
+  const formatTimeAgo = (dateString) => {
+    const diff = Math.floor((new Date() - new Date(dateString)) / 1000);
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+  };
+
+  const getNotifIcon = (type) => {
+    switch (type) {
+      case 'quiz':
+        return <HelpCircle size={16} color="#B87333" />;
+      case 'course':
+        return <Award size={16} color="#059669" />;
+      case 'announcement':
+        return <Sparkles size={16} color="#4F46E5" />;
+      default:
+        return <Bell size={16} color="#3D291F" />;
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -108,6 +200,182 @@ const Navbar = () => {
               >
                 <UserIcon size={16} /> Profile
               </Link>
+
+              {/* Notification Bell Component */}
+              <div style={{ position: 'relative' }} ref={notifRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsNotifOpen(!isNotifOpen)}
+                  style={{
+                    background: isNotifOpen ? '#EFEBE4' : 'transparent',
+                    border: '1px solid #E7E5E4',
+                    borderRadius: '50%',
+                    width: '38px',
+                    height: '38px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    color: '#3D291F',
+                    transition: 'all 0.2s'
+                  }}
+                  title="Notifications"
+                  aria-label="Notifications"
+                >
+                  <Bell size={18} />
+                  {unreadCount > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-4px',
+                      right: '-4px',
+                      backgroundColor: '#B87333',
+                      color: '#FFFFFF',
+                      fontSize: '0.7rem',
+                      fontWeight: '700',
+                      borderRadius: '10px',
+                      padding: '1px 6px',
+                      lineHeight: '1.2',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
+                    }}>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Notifications Dropdown */}
+                {isNotifOpen && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '46px',
+                    right: 0,
+                    width: '340px',
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid #E7E5E4',
+                    zIndex: 1000,
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      padding: '12px 16px',
+                      borderBottom: '1px solid #E7E5E4',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#FAF8F5'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Bell size={16} color="#3D291F" />
+                        <span style={{ fontWeight: '700', color: '#3D291F', fontSize: '0.95rem' }}>Notifications</span>
+                        {unreadCount > 0 && (
+                          <span style={{
+                            backgroundColor: '#B87333',
+                            color: '#FFF',
+                            fontSize: '0.7rem',
+                            fontWeight: '700',
+                            padding: '1px 6px',
+                            borderRadius: '10px'
+                          }}>
+                            {unreadCount}
+                          </span>
+                        )}
+                      </div>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={handleMarkAllRead}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#B87333',
+                            fontSize: '0.8rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}
+                        >
+                          <CheckCheck size={14} /> Mark all read
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
+                      {notifications.length === 0 ? (
+                        <div style={{ padding: '32px 16px', textAlign: 'center', color: '#78716C', fontSize: '0.9rem' }}>
+                          No notifications yet
+                        </div>
+                      ) : (
+                        notifications.map((notif) => (
+                          <div
+                            key={notif._id}
+                            onClick={() => handleNotificationClick(notif)}
+                            style={{
+                              padding: '12px 16px',
+                              borderBottom: '1px solid #F5F5F4',
+                              backgroundColor: notif.isRead ? '#FFFFFF' : '#FAF8F5',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              gap: '12px',
+                              alignItems: 'flex-start',
+                              transition: 'background 0.15s'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = notif.isRead ? '#F9F8F6' : '#F4EFEA'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = notif.isRead ? '#FFFFFF' : '#FAF8F5'}
+                          >
+                            <div style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              backgroundColor: '#F3EFEA',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0,
+                              marginTop: '2px'
+                            }}>
+                              {getNotifIcon(notif.type)}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{
+                                  fontSize: '0.85rem',
+                                  fontWeight: notif.isRead ? '600' : '700',
+                                  color: '#1C1917'
+                                }}>
+                                  {notif.title}
+                                </span>
+                                {!notif.isRead && (
+                                  <span style={{
+                                    width: '7px',
+                                    height: '7px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#B87333',
+                                    display: 'inline-block'
+                                  }} />
+                                )}
+                              </div>
+                              <p style={{
+                                fontSize: '0.8rem',
+                                color: '#57534E',
+                                margin: '3px 0 5px 0',
+                                lineHeight: '1.3'
+                              }}>
+                                {notif.message}
+                              </p>
+                              <span style={{ fontSize: '0.72rem', color: '#A8A29E' }}>
+                                {formatTimeAgo(notif.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div style={styles.userInfo}>
                 <span className="badge badge-primary">{user?.name}</span>
                 <button
@@ -145,6 +413,158 @@ const Navbar = () => {
               >
                 <UserIcon size={16} /> Profile
               </Link>
+
+              {/* Notification Bell Component for Faculty */}
+              <div style={{ position: 'relative' }} ref={notifRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsNotifOpen(!isNotifOpen)}
+                  style={{
+                    background: isNotifOpen ? '#EFEBE4' : 'transparent',
+                    border: '1px solid #E7E5E4',
+                    borderRadius: '50%',
+                    width: '38px',
+                    height: '38px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    color: '#3D291F',
+                    transition: 'all 0.2s'
+                  }}
+                  title="Notifications"
+                  aria-label="Notifications"
+                >
+                  <Bell size={18} />
+                  {unreadCount > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-4px',
+                      right: '-4px',
+                      backgroundColor: '#B87333',
+                      color: '#FFFFFF',
+                      fontSize: '0.7rem',
+                      fontWeight: '700',
+                      borderRadius: '10px',
+                      padding: '1px 6px',
+                      lineHeight: '1.2'
+                    }}>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {isNotifOpen && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '46px',
+                    right: 0,
+                    width: '340px',
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid #E7E5E4',
+                    zIndex: 1000,
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      padding: '12px 16px',
+                      borderBottom: '1px solid #E7E5E4',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#FAF8F5'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Bell size={16} color="#3D291F" />
+                        <span style={{ fontWeight: '700', color: '#3D291F', fontSize: '0.95rem' }}>Notifications</span>
+                        {unreadCount > 0 && (
+                          <span style={{
+                            backgroundColor: '#B87333',
+                            color: '#FFF',
+                            fontSize: '0.7rem',
+                            fontWeight: '700',
+                            padding: '1px 6px',
+                            borderRadius: '10px'
+                          }}>
+                            {unreadCount}
+                          </span>
+                        )}
+                      </div>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={handleMarkAllRead}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#B87333',
+                            fontSize: '0.8rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}
+                        >
+                          <CheckCheck size={14} /> Mark all read
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
+                      {notifications.length === 0 ? (
+                        <div style={{ padding: '32px 16px', textAlign: 'center', color: '#78716C', fontSize: '0.9rem' }}>
+                          No notifications yet
+                        </div>
+                      ) : (
+                        notifications.map((notif) => (
+                          <div
+                            key={notif._id}
+                            onClick={() => handleNotificationClick(notif)}
+                            style={{
+                              padding: '12px 16px',
+                              borderBottom: '1px solid #F5F5F4',
+                              backgroundColor: notif.isRead ? '#FFFFFF' : '#FAF8F5',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              gap: '12px',
+                              alignItems: 'flex-start'
+                            }}
+                          >
+                            <div style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              backgroundColor: '#F3EFEA',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0
+                            }}>
+                              {getNotifIcon(notif.type)}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: '0.85rem', fontWeight: notif.isRead ? '600' : '700', color: '#1C1917' }}>
+                                  {notif.title}
+                                </span>
+                              </div>
+                              <p style={{ fontSize: '0.8rem', color: '#57534E', margin: '3px 0 5px 0' }}>
+                                {notif.message}
+                              </p>
+                              <span style={{ fontSize: '0.72rem', color: '#A8A29E' }}>
+                                {formatTimeAgo(notif.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div style={styles.userInfo}>
                 <span className="badge badge-info" style={{ backgroundColor: '#FBF4ED', color: '#B87333', border: '1px solid #E7E5E4' }}>
                   Faculty: {user?.name}
@@ -190,6 +610,158 @@ const Navbar = () => {
               >
                 <UserIcon size={16} /> Profile
               </Link>
+
+              {/* Notification Bell Component for Admin */}
+              <div style={{ position: 'relative' }} ref={notifRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsNotifOpen(!isNotifOpen)}
+                  style={{
+                    background: isNotifOpen ? '#EFEBE4' : 'transparent',
+                    border: '1px solid #E7E5E4',
+                    borderRadius: '50%',
+                    width: '38px',
+                    height: '38px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    color: '#3D291F',
+                    transition: 'all 0.2s'
+                  }}
+                  title="Notifications"
+                  aria-label="Notifications"
+                >
+                  <Bell size={18} />
+                  {unreadCount > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-4px',
+                      right: '-4px',
+                      backgroundColor: '#B87333',
+                      color: '#FFFFFF',
+                      fontSize: '0.7rem',
+                      fontWeight: '700',
+                      borderRadius: '10px',
+                      padding: '1px 6px',
+                      lineHeight: '1.2'
+                    }}>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {isNotifOpen && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '46px',
+                    right: 0,
+                    width: '340px',
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid #E7E5E4',
+                    zIndex: 1000,
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      padding: '12px 16px',
+                      borderBottom: '1px solid #E7E5E4',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#FAF8F5'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Bell size={16} color="#3D291F" />
+                        <span style={{ fontWeight: '700', color: '#3D291F', fontSize: '0.95rem' }}>Notifications</span>
+                        {unreadCount > 0 && (
+                          <span style={{
+                            backgroundColor: '#B87333',
+                            color: '#FFF',
+                            fontSize: '0.7rem',
+                            fontWeight: '700',
+                            padding: '1px 6px',
+                            borderRadius: '10px'
+                          }}>
+                            {unreadCount}
+                          </span>
+                        )}
+                      </div>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={handleMarkAllRead}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#B87333',
+                            fontSize: '0.8rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}
+                        >
+                          <CheckCheck size={14} /> Mark all read
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
+                      {notifications.length === 0 ? (
+                        <div style={{ padding: '32px 16px', textAlign: 'center', color: '#78716C', fontSize: '0.9rem' }}>
+                          No notifications yet
+                        </div>
+                      ) : (
+                        notifications.map((notif) => (
+                          <div
+                            key={notif._id}
+                            onClick={() => handleNotificationClick(notif)}
+                            style={{
+                              padding: '12px 16px',
+                              borderBottom: '1px solid #F5F5F4',
+                              backgroundColor: notif.isRead ? '#FFFFFF' : '#FAF8F5',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              gap: '12px',
+                              alignItems: 'flex-start'
+                            }}
+                          >
+                            <div style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              backgroundColor: '#F3EFEA',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0
+                            }}>
+                              {getNotifIcon(notif.type)}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: '0.85rem', fontWeight: notif.isRead ? '600' : '700', color: '#1C1917' }}>
+                                  {notif.title}
+                                </span>
+                              </div>
+                              <p style={{ fontSize: '0.8rem', color: '#57534E', margin: '3px 0 5px 0' }}>
+                                {notif.message}
+                              </p>
+                              <span style={{ fontSize: '0.72rem', color: '#A8A29E' }}>
+                                {formatTimeAgo(notif.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div style={styles.userInfo}>
                 <span className="badge badge-warning">
                   <Shield size={12} style={{ marginRight: 4 }} /> Admin

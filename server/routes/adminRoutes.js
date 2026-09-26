@@ -7,7 +7,11 @@ const {
   createFaculty,
   updateFaculty,
   deleteFaculty,
-  getAdminStats
+  getAdminStats,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  toggleUserStatus
 } = require('../controllers/adminController');
 const { getAdminAttendanceStats } = require('../controllers/attendanceController');
 const { protect, admin } = require('../middleware/auth');
@@ -17,6 +21,12 @@ router.use(protect, admin);
 router.get('/students', getStudents);
 router.get('/stats', getAdminStats);
 router.get('/attendance/stats', getAdminAttendanceStats);
+
+// User Management (Students & Faculty)
+router.get('/users', getAllUsers);
+router.get('/users/:id', getUserById);
+router.put('/users/:id', updateUser);
+router.put('/users/:id/status', toggleUserStatus);
 
 // Faculty Management
 router.route('/faculty')

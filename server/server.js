@@ -13,6 +13,8 @@ const userRoutes = require('./routes/userRoutes');
 const facultyRoutes = require('./routes/facultyRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const quizRoutes = require('./routes/quizRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -65,6 +67,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/faculty', facultyRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/quizzes', quizRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Root Status Route
 app.get('/', (req, res) => {
