@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, LogIn, Lock, Mail, ArrowRight } from 'lucide-react';
+import { BookOpen, LogIn, Lock, Mail, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,6 +12,7 @@ const Login = () => {
     email: '',
     password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -38,7 +39,7 @@ const Login = () => {
       
       // Redirect strictly based on role
       const fromPath = location.state?.from?.pathname;
-      if (fromPath && fromPath !== '/' && !fromPath.includes('/login') && !fromPath.includes('/register')) {
+      if (fromPath && fromPath !== '/' && !fromPath.includes('/login') && !fromPath.includes('/register') && !fromPath.includes('/forgot-password')) {
         navigate(fromPath, { replace: true });
       } else if (user.role === 'admin') {
         navigate('/admin/dashboard', { replace: true });
@@ -90,22 +91,36 @@ const Login = () => {
             <div style={{ position: 'relative' }}>
               <Lock size={18} color="#78716C" style={styles.inputIcon} />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 className="form-input"
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                style={{ paddingLeft: '2.5rem' }}
+                style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={styles.eyeBtn}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={18} color="#78716C" /> : <Eye size={18} color="#78716C" />}
+              </button>
             </div>
+          </div>
+
+          <div style={styles.forgotRow}>
+            <Link to="/forgot-password" style={styles.forgotLink}>
+              Forgot Password?
+            </Link>
           </div>
 
           <button
             type="submit"
             className="btn btn-primary btn-lg"
-            style={{ width: '100%', marginTop: '1rem' }}
+            style={{ width: '100%', marginTop: '0.5rem' }}
             disabled={loading}
           >
             {loading ? 'Authenticating...' : (
@@ -173,6 +188,32 @@ const styles = {
     left: '12px',
     top: '50%',
     transform: 'translateY(-50%)'
+  },
+  eyeBtn: {
+    position: 'absolute',
+    right: '12px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'none',
+    border: 'none',
+    padding: '4px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  forgotRow: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    marginBottom: '1rem',
+    marginTop: '-0.25rem'
+  },
+  forgotLink: {
+    color: '#B87333',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    textDecoration: 'none',
+    transition: 'color 0.2s'
   },
   footerNote: {
     textAlign: 'center',

@@ -51,6 +51,14 @@ export const authService = {
   getMe: async () => {
     const response = await api.get('/auth/me');
     return response.data;
+  },
+  forgotPassword: async (data) => {
+    const response = await api.post('/auth/forgot-password', data);
+    return response.data;
+  },
+  updatePassword: async (data) => {
+    const response = await api.post('/auth/update-password', data);
+    return response.data;
   }
 };
 
@@ -198,6 +206,10 @@ export const userService = {
   },
   updateProfile: async (data) => {
     const response = await api.put('/users/profile', data);
+    return response.data;
+  },
+  updatePassword: async (data) => {
+    const response = await api.post('/auth/update-password', data);
     return response.data;
   }
 };

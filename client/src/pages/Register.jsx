@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, User, Mail, Lock, Phone, Briefcase, GraduationCap, Award, Calendar, Layers, ArrowRight, ShieldCheck } from 'lucide-react';
+import { BookOpen, User, Mail, Lock, Phone, Briefcase, GraduationCap, Award, Calendar, Layers, ArrowRight, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 
 const Register = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
 
   const [role, setRole] = useState('student'); // 'student' | 'faculty'
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -202,15 +204,23 @@ const Register = () => {
               <div style={{ position: 'relative' }}>
                 <Lock size={18} color="#78716C" style={styles.inputIcon} />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   name="password"
                   className="form-input"
                   placeholder="Minimum 6 characters"
                   value={formData.password}
                   onChange={handleChange}
-                  style={{ paddingLeft: '2.5rem' }}
+                  style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={styles.eyeBtn}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={18} color="#78716C" /> : <Eye size={18} color="#78716C" />}
+                </button>
               </div>
             </div>
 
@@ -219,15 +229,23 @@ const Register = () => {
               <div style={{ position: 'relative' }}>
                 <Lock size={18} color="#78716C" style={styles.inputIcon} />
                 <input
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   name="confirmPassword"
                   className="form-input"
                   placeholder="Re-enter password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  style={{ paddingLeft: '2.5rem' }}
+                  style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={styles.eyeBtn}
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? <EyeOff size={18} color="#78716C" /> : <Eye size={18} color="#78716C" />}
+                </button>
               </div>
             </div>
           </div>
@@ -572,6 +590,19 @@ const styles = {
     left: '12px',
     top: '50%',
     transform: 'translateY(-50%)'
+  },
+  eyeBtn: {
+    position: 'absolute',
+    right: '12px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'none',
+    border: 'none',
+    padding: '4px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   footerNote: {
     textAlign: 'center',

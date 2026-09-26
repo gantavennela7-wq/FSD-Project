@@ -48,7 +48,54 @@ const updateUserProfile = async (req, res, next) => {
   }
 };
 
+// @desc    Update password for authenticated user
+// @route   POST /api/users/update-password or PUT /api/users/update-password
+// @access  Private
+const updatePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      res.status(400);
+      throw new Error('Please enter both current and new password.');
+    }
+
+    if (confirmPassword && newPassword !== confirmPassword) {
+      res.status(400);
+      throw new Error('New password and confirm password do not match.');
+    }
+
+    if (newPassword.length < 6) {
+      res.status(400);
+      throw new Error('Password must be at least 6 characters.');
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found.');
+    }
+
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      res.status(400);
+      throw new Error('Current password is incorrect.');
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password updated successfully.'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getUserProfile,
-  updateUserProfile
+  updateUserProfile,
+  updatePassword
 };

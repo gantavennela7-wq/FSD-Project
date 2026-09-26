@@ -9,6 +9,7 @@ import Courses from '../pages/Courses';
 import CourseDetails from '../pages/CourseDetails';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
+import ForgotPassword from '../pages/ForgotPassword';
 
 // Protected Student Pages
 import StudentDashboard from '../pages/StudentDashboard';
@@ -81,6 +82,14 @@ const AppRoutes = () => {
         element={
           <PublicOnlyRoute>
             <Register />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicOnlyRoute>
+            <ForgotPassword />
           </PublicOnlyRoute>
         }
       />

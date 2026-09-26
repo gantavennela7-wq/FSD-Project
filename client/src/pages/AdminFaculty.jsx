@@ -11,6 +11,7 @@ import {
   BookOpen,
   GraduationCap,
   Eye,
+  EyeOff,
   Mail,
   Phone,
   Briefcase,
@@ -66,6 +67,7 @@ const AdminFaculty = () => {
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [actionSuccess, setActionSuccess] = useState('');
+  const [showModalPassword, setShowModalPassword] = useState(false);
 
   const fetchFaculty = async () => {
     setLoading(true);
@@ -404,15 +406,38 @@ const AdminFaculty = () => {
           <div className="grid-2">
             <div className="form-group">
               <label className="form-label">Password *</label>
-              <input
-                type="password"
-                name="password"
-                className="form-input"
-                value={formData.password}
-                onChange={handleFormChange}
-                placeholder="Minimum 6 characters"
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showModalPassword ? 'text' : 'password'}
+                  name="password"
+                  className="form-input"
+                  value={formData.password}
+                  onChange={handleFormChange}
+                  placeholder="Minimum 6 characters"
+                  style={{ paddingRight: '2.5rem' }}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowModalPassword(!showModalPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '10px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    padding: '4px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    color: '#78716C'
+                  }}
+                  aria-label={showModalPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showModalPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
 
             <div className="form-group">
@@ -560,14 +585,37 @@ const AdminFaculty = () => {
           <div className="grid-2">
             <div className="form-group">
               <label className="form-label">New Password (leave blank to keep current)</label>
-              <input
-                type="password"
-                name="password"
-                className="form-input"
-                value={formData.password}
-                onChange={handleFormChange}
-                placeholder="••••••••"
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showModalPassword ? 'text' : 'password'}
+                  name="password"
+                  className="form-input"
+                  value={formData.password}
+                  onChange={handleFormChange}
+                  placeholder="••••••••"
+                  style={{ paddingRight: '2.5rem' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowModalPassword(!showModalPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '10px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    padding: '4px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    color: '#78716C'
+                  }}
+                  aria-label={showModalPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showModalPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
 
             <div className="form-group">

@@ -173,4 +173,91 @@ const getMe = async (req, res, next) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getMe };
+// @desc    Forgot / Reset password
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email, newPassword, confirmPassword, password } = req.body;
+    const targetPassword = newPassword || password;
+
+    if (!email || !targetPassword) {
+      res.status(400);
+      throw new Error('Please enter your email and new password.');
+    }
+
+    if (confirmPassword && targetPassword !== confirmPassword) {
+      res.status(400);
+      throw new Error('New password and confirm password do not match.');
+    }
+
+    if (targetPassword.length < 6) {
+      res.status(400);
+      throw new Error('Password must be at least 6 characters.');
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      res.status(404);
+      throw new Error('User with this email was not found.');
+    }
+
+    user.password = targetPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password updated successfully. Please login with your new password.'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update password for authenticated user
+// @route   POST /api/auth/update-password
+// @access  Private
+const updatePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      res.status(400);
+      throw new Error('Please enter both current and new password.');
+    }
+
+    if (confirmPassword && newPassword !== confirmPassword) {
+      res.status(400);
+      throw new Error('New password and confirm password do not match.');
+    }
+
+    if (newPassword.length < 6) {
+      res.status(400);
+      throw new Error('Password must be at least 6 characters.');
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found.');
+    }
+
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      res.status(400);
+      throw new Error('Current password is incorrect.');
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password updated successfully.'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { registerUser, loginUser, getMe, forgotPassword, updatePassword };
