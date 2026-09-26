@@ -1,13 +1,18 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
-  const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/lms_db';
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    console.error('❌ MONGODB_URI is not set in server/.env');
+    return;
+  }
   try {
     const conn = await mongoose.connect(uri);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    const isAtlas = conn.connection.host.includes('mongodb.net') || conn.connection.host.includes('cluster');
+    console.log(`✅ MongoDB Connected to ${isAtlas ? 'MongoDB Atlas' : 'Host'}: ${conn.connection.host} [DB: ${conn.connection.name}]`);
   } catch (error) {
-    console.error(`MongoDB Initial Connection Error: ${error.message}`);
-    console.log('Ensure MongoDB service or mongod is running on 127.0.0.1:27017. Retrying in 5 seconds...');
+    console.error(`❌ MongoDB Connection Error: ${error.message}`);
+    console.log('Retrying in 5 seconds...');
     setTimeout(connectDB, 5000);
   }
 };
